@@ -1,0 +1,598 @@
+==========================================================
+TRIGGERS IN MYSQL
+==========================================================
+
+A Trigger is a stored program that automatically executes
+when an event like INSERT, UPDATE, or DELETE operation occurs on a table.
+
+Trigger executes automatically.
+User does NOT call it manually.
+
+Trigger = Automatic action on table events.
+
+A Trigger is a stored program that automatically executes when an event like INSERT, UPDATE, or DELETE occurs on a table.
+
+----------------------------------------------------------
+
+WHY TRIGGERS?
+----------------------------------------------------------
+
+We use triggers when:
+
+- We want automatic actions
+- We want to maintain data integrity
+- We want to track changes (audit logs)
+- We want to enforce business rules
+
+----------------------------------------------------------
+
+REAL LIFE EXAMPLE
+----------------------------------------------------------
+
+Banking System:
+Deposit → update balance automatically
+Delete employee → store record in audit table
+Salary update → maintain salary history
+
+----------------------------------------------------------
+
+TYPES OF TRIGGERS
+----------------------------------------------------------
+
+Based on EVENT:
+INSERT Trigger → fires when row inserted
+UPDATE Trigger → fires when row updated
+DELETE Trigger → fires when row deleted
+
+Based on TIMING:
+BEFORE Trigger → runs before action
+AFTER Trigger → runs after action
+
+
+1. BEFORE INSERT
+- Runs before inserting data
+
+2. AFTER INSERT
+- Runs after inserting data
+
+3. BEFORE UPDATE
+- Runs before updating data
+
+4. AFTER UPDATE
+- Runs after updating data
+
+5. BEFORE DELETE
+- Runs before deleting data
+
+6. AFTER DELETE
+- Runs after deleting data
+
+----------------------------------------------------------
+ADVANTAGES OF TRIGGERS
+----------------------------------------------------------
+
+- Automatic execution
+- Maintains data integrity
+- Helps in audit tracking
+- Reduces manual work
+- Enforces business rules
+
+----------------------------------------------------------
+DISADVANTAGES OF TRIGGERS
+----------------------------------------------------------
+
+- Hard to debug
+- Can slow performance
+- Hidden logic (not visible in queries)
+- Complex in large systems
+
+----------------------------------------------------------
+WHEN TO USE TRIGGERS?
+----------------------------------------------------------
+
+- Audit logging
+- Data validation
+- Automatic updates
+- History tracking
+
+----------------------------------------------------------
+
+TRIGGER SYNTAX
+----------------------------------------------------------
+
+CREATE TRIGGER trigger_name
+BEFORE/AFTER INSERT/UPDATE/DELETE
+ON table_name
+FOR EACH ROW
+BEGIN
+    -- SQL statements(trigger stmts)
+END;
+
+
+FOR EACH ROW means trigger executes for every affected row.
+----------------------------------------------------------
+EXAMPLE 1 : AFTER INSERT TRIGGER
+----------------------------------------------------------
+
+Scenario:
+When a new employee is added, automatically insert
+a record into log table.
+
+STEP 1 : CREATE EMPLOYEE TABLE
+
+CREATE TABLE Employees(
+emp_id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(50),
+salary INT
+);
+
+STEP 2 : CREATE LOG TABLE
+
+CREATE TABLE Emp_Log(
+log_id INT AUTO_INCREMENT PRIMARY KEY,
+emp_name VARCHAR(50),
+action VARCHAR(50)
+);
+
+STEP 3 : CREATE AFTER INSERT TRIGGER
+
+DELIMITER //
+
+CREATE TRIGGER after_emp_insert
+AFTER INSERT ON Employees
+FOR EACH ROW
+BEGIN
+INSERT INTO Emp_Log(emp_name, action)
+VALUES (NEW.name, 'Employee Inserted');
+END //
+
+DELIMITER ;
+
+STEP 4 : TEST TRIGGER
+
+INSERT INTO Employees(name, salary)
+VALUES ('Ravi', 40000);
+
+MySQL internally creates a temporary row:
+
+NEW.emp_id = 1
+NEW.name   = 'Ravi'
+NEW.salary = 40000
+
+INSERT happens
+        ↓
+MySQL creates NEW row
+        ↓
+Trigger reads NEW.name
+        ↓
+Value = Ravi
+        ↓
+Inserted into Emp_Log
+
+
+STEP 5 : VERIFY RESULT
+
+select * from employees;
+
+SELECT * FROM Emp_Log;
++--------+----------+-------------------+
+| log_id | emp_name | action            |
++--------+----------+-------------------+
+|      1 | Ravi     | Employee Inserted |
++--------+----------+-------------------+
+
+
+Output:
+Employee Inserted entry automatically appears.
+
+NOTE:NEW.name → accesses newly inserted employee name.
+----------------------------------------------------------
+## EXAMPLE 2 : AFTER UPDATE TRIGGER
+
+Scenario:
+When employee salary is updated, automatically
+store old and new salary details in history table.
+
+---
+
+STEP 1 : USE EXISTING EMPLOYEE TABLE
+
+(Already Created)
+
+CREATE TABLE Employees(
+emp_id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(50),
+salary INT
+);
+
+---
+
+STEP 2 : CREATE SALARY HISTORY TABLE
+
+CREATE TABLE Salary_History(
+history_id INT AUTO_INCREMENT PRIMARY KEY,
+emp_id INT,
+old_salary INT,
+new_salary INT
+);
+
+---
+
+STEP 3 : CREATE AFTER UPDATE TRIGGER
+
+DELIMITER //
+
+CREATE TRIGGER after_emp_update
+AFTER UPDATE ON Employees
+FOR EACH ROW
+BEGIN
+INSERT INTO Salary_History(emp_id, old_salary, new_salary)
+VALUES (OLD.emp_id, OLD.salary, NEW.salary);
+END //
+
+DELIMITER ;
+
+---
+
+STEP 4 : TEST TRIGGER
+
+UPDATE Employees
+SET salary = 45000
+WHERE name = 'Ravi';
+
+
+What MySQL Sees Internally
+
+Before update:
+
+OLD.emp_id = 1
+OLD.salary = 40000
+
+After update:
+
+NEW.emp_id = 1
+NEW.salary = 45000
+
+---
+
+STEP 5 : VERIFY RESULT
+
+SELECT * FROM Salary_History;
+
++------------+--------+------------+------------+
+| history_id | emp_id | old_salary | new_salary |
++------------+--------+------------+------------+
+|          1 |      1 |      40000 |      45000 |
++------------+--------+------------+------------+
+
+---
+
+Output:
+Salary change is automatically recorded.
+
+---
+
+EXPLANATION
+
+OLD.salary → salary before update
+NEW.salary → salary after update
+
+Trigger runs automatically after UPDATE operation.
+
+NOTE:
+
+UPDATE trigger has access to BOTH:
+
+OLD → previous row values
+NEW → modified row values
+
+============================================================
+EXAMPLE 3 : AFTER DELETE TRIGGER
+============================================================
+Scenario:
+When an employee record is deleted, automatically
+store deleted employee details in backup table.
+
+---
+
+STEP 1 : USE EXISTING EMPLOYEE TABLE
+
+(Already Created)
+
+CREATE TABLE Employees(
+emp_id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(50),
+salary INT
+);
+
+---
+
+STEP 2 : CREATE DELETED EMPLOYEE BACKUP TABLE
+
+CREATE TABLE Deleted_Employees(
+backup_id INT AUTO_INCREMENT PRIMARY KEY,
+emp_id INT,
+name VARCHAR(50),
+salary INT
+);
+
+---
+
+STEP 3 : CREATE AFTER DELETE TRIGGER
+
+DELIMITER //
+
+CREATE TRIGGER after_emp_delete
+AFTER DELETE ON Employees
+FOR EACH ROW
+BEGIN
+INSERT INTO Deleted_Employees(emp_id, name, salary)
+VALUES (OLD.emp_id, OLD.name, OLD.salary);
+END //
+
+DELIMITER ;
+
+---
+
+STEP 4 : TEST TRIGGER
+
+DELETE FROM Employees
+WHERE name = 'Ravi';
+
+---
+
+STEP 5 : VERIFY RESULT
+
+SELECT * FROM Deleted_Employees;
+
++-----------+--------+------+--------+
+| backup_id | emp_id | name | salary |
++-----------+--------+------+--------+
+|         1 |      1 | Ravi | 45000  |
++-----------+--------+------+--------+
+
+---
+
+Output:
+Deleted employee record automatically stored
+in backup table.
+
+---
+
+EXPLANATION
+
+OLD.emp_id  → employee id before deletion
+OLD.name    → employee name before deletion
+OLD.salary  → salary before deletion
+
+DELETE trigger uses OLD values because
+row no longer exists after deletion.
+---
+============================================================
+EXAMPLE 1 : BEFORE INSERT TRIGGER
+============================================================
+
+Scenario:
+Before inserting an employee record,
+automatically validate salary.
+If salary is less than 10000,
+set minimum salary as 10000.
+
+------------------------------------------------------------
+
+STEP 1 : CREATE EMPLOYEE TABLE
+
+CREATE TABLE Employees(
+emp_id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(50),
+salary INT
+);
+
+------------------------------------------------------------
+
+STEP 2 : CREATE BEFORE INSERT TRIGGER
+
+DELIMITER //
+
+CREATE TRIGGER before_emp_insert
+BEFORE INSERT ON Employees
+FOR EACH ROW
+BEGIN
+
+IF NEW.salary < 10000 THEN
+SET NEW.salary = 10000;
+END IF;
+
+END //
+
+DELIMITER ;
+
+------------------------------------------------------------
+
+STEP 3 : TEST TRIGGER
+
+INSERT INTO Employees(name, salary)
+VALUES('Ravi',5000);
+
+
+INSERT INTO Employees(name, salary)
+VALUES('Ravi',0);
+
+------------------------------------------------------------
+
+STEP 4 : VERIFY RESULT
+
+SELECT * FROM Employees;
+
++--------+------+--------+
+| emp_id | name | salary |
++--------+------+--------+
+| 1      | Ravi | 10000  |
++--------+------+--------+
+
+------------------------------------------------------------
+
+Output:
+Salary automatically corrected before insert.
+
+------------------------------------------------------------
+
+EXPLANATION
+
+NEW.name   → value being inserted
+NEW.salary → salary before insertion
+
+BEFORE INSERT allows modifying values
+before data is stored in table.
+============================================================
+EXAMPLE 2 : BEFORE UPDATE TRIGGER
+============================================================
+
+Scenario:
+Before updating employee salary,
+prevent salary reduction below 15000.
+
+Salary should never decrease. Employees can get increments only.
+Salary reduction not allowed.
+
+------------------------------------------------------------
+
+STEP 1 : USE EXISTING EMPLOYEE TABLE
+
+(Already Created)
+
+------------------------------------------------------------
+
+STEP 2 : CREATE BEFORE UPDATE TRIGGER
+
+DELIMITER //
+
+CREATE TRIGGER before_emp_update
+BEFORE UPDATE ON Employees
+FOR EACH ROW
+BEGIN
+
+IF NEW.salary < 15000 THEN
+SET NEW.salary = OLD.salary;
+END IF;
+
+END //
+
+DELIMITER ;
+
+------------------------------------------------------------
+
+STEP 3 : TEST TRIGGER
+
+UPDATE Employees
+SET salary = 8000
+WHERE emp_id = 2;
+
+UPDATE Employees
+SET salary = 16000
+WHERE emp_id = 2;
+------------------------------------------------------------
+
+STEP 4 : VERIFY RESULT
+
+SELECT * FROM Employees;
+
++--------+------+--------+
+| emp_id | name | salary |
++--------+------+--------+
+| 1      | Ravi | 10000  |
++--------+------+--------+
+
+------------------------------------------------------------
+
+Output:
+Salary update prevented if below limit.
+
+------------------------------------------------------------
+
+EXPLANATION
+
+OLD.salary → existing salary in table
+NEW.salary → new updating value
+
+BEFORE UPDATE validates data
+before modification happens.
+============================================================
+EXAMPLE 3 : BEFORE DELETE TRIGGER
+============================================================
+
+Scenario:
+Before deleting an employee,
+do not allow deletion if salary
+is greater than 50000.
+
+------------------------------------------------------------
+
+STEP 1 : USE EXISTING EMPLOYEE TABLE
+
+CREATE TABLE Employees(
+emp_id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(50) NOT NULL,
+department VARCHAR(50),
+salary INT,
+joining_date DATE
+);
+
+INSERT INTO Employees(name, department, salary, joining_date)
+VALUES
+('Ravi','HR',20000,'2020-01-10'),
+('Anu','IT',25000,'2019-03-15'),
+('Meena','Finance',60000,'2018-07-20'),
+('Kiran','IT',18000,'2021-05-01');
+
+------------------------------------------------------------
+
+STEP 2 : CREATE BEFORE DELETE TRIGGER
+
+DELIMITER //
+
+CREATE TRIGGER before_emp_delete
+BEFORE DELETE ON Employees
+FOR EACH ROW
+BEGIN
+
+IF OLD.salary > 50000 THEN
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'High salary employee cannot be deleted';
+END IF;
+
+END //
+
+DELIMITER ;
+
+------------------------------------------------------------
+
+STEP 3 : TEST TRIGGER
+
+DELETE FROM Employees
+WHERE name = 'Meena';
+
+DELETE FROM Employees
+WHERE emp_id = 2;
+
+------------------------------------------------------------
+
+STEP 4 : RESULT
+
+ERROR 1644 (45000):
+High salary employee cannot be deleted
+
+------------------------------------------------------------
+
+Output:
+Deletion blocked before removing record.
+
+------------------------------------------------------------
+
+EXPLANATION
+
+OLD.emp_id  → employee id before delete
+OLD.salary  → salary before deletion
+
+BEFORE DELETE checks condition
+before row removal occurs.

@@ -1,0 +1,547 @@
+===============================================================================
+MYSQL INTRODUCTION
+===============================================================================
+
+1. Data
+2. Information
+3. Database
+4. Data Warehouse 
+5. DBMS
+6. RDBMS
+7. Various Database Products
+8. History of Databases 
+9. Data Modelling
+10. ER Diagram
+11. Relational Model
+12. Schema
+13. Normalization
+14. Optimization 
+15. SQL Introduction
+-------------------------------------------------------------------------------
+1.Data-
+Data is a collection of raw facts and figures that can be stored, processed, and managed in a database.
+Example: Student Name, Roll No, Marks.
+-------------------------------------------------------------------------------
+2.Information-
+Information is data that has been processed, organized, or interpreted so that it becomes meaningful and useful for decision-making.
+Example: Bank
+
+Data:
+Deposit: ₹20,000
+Withdrawal: ₹5,000
+
+Information:
+Current account balance is ₹15,000.
+-------------------------------------------------------------------------------
+3.Database-
+A database is an organized collection of related data that is stored electronically and 
+can be easily accessed, managed, and updated.
+A database helps store large amounts of information in a structured way so that users can retrieve 
+and manipulate it efficiently
+
+A database contains:
+Database → Collection of tables
+Table → Collection of rows and columns
+Data → The values stored in those rows and columns
+
+Example:
+Bank – Stores customer accounts and daily transactions.
+ATM – Stores account balance and withdrawal history.
+Hospital – Stores patient records and appointment details.
+School/College – Stores student information, marks, and attendance.
+
+-------------------------------------------------------------------------------
+
+4.DWH data warehouse- 
+A Data Warehouse is a centralized repository that stores large amounts of historical data collected 
+from multiple sources for reporting, analysis, and decision-making.
+Example:
+Supermarket head office stores 5 years of sales data from all branches for business analysis.
+Retail Chain – Stores sales data from all branches over several years for business analysis.
+Bank – Stores historical customer transactions to identify spending trends and fraud patterns.
+Hospital – Stores years of patient records to analyze disease trends and treatment outcomes.
+
+
+| Database (OLTP)             | Data Warehouse (OLAP)  
+ Online Transaction Processing|Online Analytical Processing
+| --------------------------- | ------------------------------------------- |
+| Stores current data         | Stores historical data                      |
+| Used for daily transactions | Used for analysis and reporting             |
+| Frequently updated          | Updated periodically (daily/weekly/monthly) |
+| Example: Cash Counter       | Example: Head Office                        |
+
+-------------------------------------------------------------------------------
+
+5.DBMS-
+A Database Management System (DBMS) is software that allows users to create, store, retrieve, update,
+and manage data in a database.
+Or A DBMS is a software system used to create and manage databases while ensuring data security, 
+consistency, and efficient access.
+
+Popular DBMS software:
+Oracle
+MySQL
+MongoDB
+
+MySQL – Used to manage student, banking, and shopping databases.
+Oracle Database – Used by banks and large enterprises.
+Microsoft SQL Server – Used in hospitals and corporate organizations.
+PostgreSQL – Used for web applications and enterprise systems.
+SQLite – Used in mobile applications.
+-------------------------------------------------------------------------------
+6.RDBMS-
+RDBMS (Relational Database Management System) is a type of DBMS that stores data in the form of tables
+(relations) consisting of rows and columns. 
+Relationships between tables are established using keys such as primary keys and foreign keys.
+An RDBMS is a database management system based on the relational model, where data is organized into 
+related tables.
+
+Students Table
+
++------------+--------+
+| Student_ID | Name   |
++------------+--------+
+| 101        | Rahul  |
+| 102        | Priya  |
++------------+--------+
+
+Courses Table
+
++-----------+------------+----------+
+| Course_ID | Student_ID | Course   |
++-----------+------------+----------+
+| C101      | 101        | SQL      |
+| C102      | 102        | Python   |
++-----------+------------+----------+
+
+Student_ID is the common column that connects both tables.
+This relationship is created using a Primary Key and a Foreign Key.
+
+-------------------------------------------------------------------------------
+7.VARIOUS DATABASE PRODUCTS AVAILABLE IN THE MARKET
+===============================================================================
+
+Database Product           Vendor                  Common Usage
+---------------------------------------------------------------------------
+MySQL                      Oracle Corporation      Web applications, Education
+Oracle Database            Oracle Corporation      Banking, ERP, Large Enterprises
+Microsoft SQL Server       Microsoft               Business Applications, BI
+PostgreSQL                 PostgreSQL Community    Enterprise & Web Applications
+MariaDB                    MariaDB Foundation      Open-source Web Applications
+SQLite                     SQLite Consortium       Mobile Apps, Embedded Systems
+IBM Db2                    IBM                     Banking, Insurance, Enterprises
+MongoDB                    MongoDB Inc.            NoSQL, Big Data, Web Apps
+Apache Cassandra           Apache Foundation       Big Data, Distributed Systems
+Redis                      Redis Ltd.              Caching, Real-time Applications
+Amazon Aurora              Amazon Web Services     Cloud Databases
+Google Cloud SQL           Google Cloud            Cloud-based Applications
+Snowflake                  Snowflake Inc.          Data Warehousing & Analytics
+Teradata                   Teradata Corporation    Data Warehousing
+SAP HANA                   SAP                     ERP & Real-time Analytics
+
+===============================================================================
+MOST COMMONLY USED DATABASES IN INDUSTRY
+===============================================================================
+
+1. Oracle Database
+2. Microsoft SQL Server
+3. MySQL
+4. PostgreSQL
+5. MongoDB
+6. Snowflake
+7. SAP HANA
+
+===============================================================================
+POPULAR NoSQL DATABASES
+===============================================================================
+What is NoSQL?
+NoSQL stands for Not Only SQL.
+
+It refers to databases that do not store data only in tables like an RDBMS. 
+Instead, they can store data in documents, key-value pairs, columns, or graphs.
+
+NoSQL is a database that stores data in flexible formats (such as JSON documents) 
+instead of only rows and columns.
+
+• MongoDB
+• Cassandra
+• Redis
+• CouchDB
+• Neo4j
+
+example:Json code
+
+{
+  "Customer_ID": 101,
+  "Name": "Rahul",
+  "City": "Bangalore",
+  "Orders": [
+    "Laptop",
+    "Mouse",
+    "Keyboard"
+  ]
+}
+
+------------------------------------------------------------------------------------------
+8. HISTORY OF DATABASES
+===============================================================================
+
+How Data Was Stored Earlier
+---------------------------
+
+In the early 1950s, computers were not widely available. Most organizations
+stored information manually using paper records, registers, and files.
+
+Example:
+• Student admission registers
+• Bank passbooks
+• Employee record books
+• Hospital patient files
+
+Disadvantages of Manual Record Keeping
+--------------------------------------
+1. Human Errors
+   Mistakes such as incorrect or missing information.
+
+2. Time-Consuming
+   Writing, updating, and searching records takes a lot of time.
+
+3. Difficult to Store and Manage
+   Requires large physical storage space and is difficult to organize.
+
+4. Lack of Security
+   Anyone can access or modify records; no password protection.
+
+5. No Backup or Recovery
+   Lost or damaged records cannot be easily recovered.
+
+6. Prone to Damage
+   Paper records can be damaged by fire, water, insects, or wear and tear.
+
+7. Difficult to Search
+   Finding a specific record among many files is slow and inefficient.
+
+===============================================================================
+INTRODUCTION OF COMPUTERS
+===============================================================================
+
+As computers became popular, organizations started storing data in files such as:
+
+• Excel Files (.xlsx)
+• CSV Files (.csv)
+• Text Files (.txt)
+
+Advantages
+----------
+• Faster data entry.
+• Easier to search and read records.
+• Reduced paper usage.
+• Less physical storage required.
+• Simple to maintain compared to paper records.
+
+However, storing data in separate files also created new problems.
+
+Problems with File-Based Systems
+--------------------------------
+• Performance issues when files became very large.
+• Data redundancy (duplicate data).
+• Data inconsistency (same data with different values).
+• No proper multi-user access.
+• No locking mechanism when multiple users updated the same file.
+• Difficult to maintain relationships between different files.
+• Higher chances of data loss and errors.
+
+===============================================================================
+INTRODUCTION OF DATABASES
+===============================================================================
+
+To overcome the limitations of file-based systems, Database Management Systems
+(DBMS) were introduced.
+
+Advantages of Databases
+-----------------------
+• Reduces Data Redundancy
+  Eliminates unnecessary duplicate data.
+
+• Improves Data Consistency
+  Ensures the same data remains accurate and consistent throughout the database.
+
+• Stores Data in a Structured Manner
+  Organizes data into tables, making it easy to manage and retrieve.
+
+• Maintains Relationships Between Data
+  Connects related tables using Primary Keys and Foreign Keys.
+
+• Supports Multiple Users
+  Allows multiple users to access and work on the database simultaneously.
+
+• Provides Better Security
+  Protects data by controlling who can view or modify it.
+
+• Supports Backup and Recovery
+  Enables data to be restored if it is accidentally lost or damaged.
+
+• Faster Data Retrieval
+  Retrieves required information quickly, even from large databases.
+
+• Easier Data Maintenance
+  Makes inserting, updating, deleting, and managing data simple and efficient.
+
+-------------------------------------------------------------------------------
+9.Data modelling-
+Data Modelling is the process of designing and organizing data structures for a database. 
+It defines how data is stored, related, and accessed within a database system.
+The goal of data modelling is to create a clear blueprint for the database before implementation.
+
+Note:Data Modeling = The entire process of planning a house.
+ER Diagram = The blueprint/drawing of the house.
+
+Types of data modelling
+Conceptual data model
+logical data model
+Physical data  model
+
+Think of building a house:
+1.Conceptual Model-Idea of the house -Number of rooms-Overall layout
+2.Logical Model-Detailed floor plan-Room dimensions-Door and window locations
+3.Physical Model-Actual construction-Bricks, cement, electrical wiring, plumbing
+
+-------------------------------------------------------------------------------
+10.ER DIAGRAMs -
+ER Diagram (Entity-Relationship Diagram) is a graphical representation of the entities in a database 
+and the relationships between them.
+Or
+An ER Diagram is a blueprint of a database that shows entities, attributes, and relationships among 
+entities.
+
+Real-Time Example
+-----------------
+College Management System
+
+Entities:
+1. Student
+2. Course
+
+Relationship:
+A Student enrolls in a Course.
+
+ER Diagram
+
+• Student and Course are the entities.
+• Student_ID is the Primary Key in the Students table.
+• Student_ID in the Courses table is the Foreign Key.
+• The Foreign Key creates the relationship between Student and Course.
+• This relationship is represented in the ER Diagram.
+
+	Student
+           |
+      ENROLLS
+           |
+        Course
+
+After designing the ER diagram, we create the tables.
+-------------------------------------------------------------------------------
+11.Relational model-
+The Relational Model is a way of organizing data in a database using tables (relations).
+
+In the relational model:
+Data is stored in tables.
+Each table consists of rows (tuples/records) and columns (attributes/fields).
+Relationships between tables are established using keys.
+--------------------------------------------------------------------------------
+12.Schema
+Schema is the logical structure or blueprint of a database. It is a collection of database objects 
+such as tables, views, indexes, stored procedures, functions, and triggers that define 
+how the database is organized.
+
+It defines:
+
+• What tables exist in the database
+• What columns each table contains
+• Data types of the columns
+• Constraints (Primary Key, Foreign Key, etc.)
+• Relationships between tables
+
+In simple words,
+
+A Schema tells us how the database is organized.
+
+Server
+   │
+   ├── Database 1
+   │      │
+   │      ├── Schema
+   │      │      ├── Table 1
+   │      │      ├── Table 2
+   │      │      ├── View
+   │      │      ├── Procedure
+   │      │      └── Function
+   │
+   ├── Database 2
+   │      │
+   │      └── Schema
+   │             ├── Table
+   │             ├── View
+   │             └── ...
+
+--------------------------------------------------------------------------------
+13.NORMALIZATION -
+Normalization is the process of organizing data in a database to reduce data redundancy
+(duplicate data) and improve data consistency.
+
+It divides large tables into smaller related tables and establishes relationships between them.
+
+Suppose we have one large table containing 10 lakh (1 million) records.
+
+• Duplicate data is stored many times.
+• Updating data becomes difficult.
+• Searching and maintaining data becomes inefficient.
+• More storage space is required.
+
+Instead, we split the data into multiple related tables.
+
+--------------------------------------------------------------------------------
+14.Optimization 
+
+Optimization- means making the database work faster and more efficiently.
+Optimization is the process of enhancing performance, reducing resource usage, and improving efficiency.
+
+Example:
+Searching for one student among 10 students is easy.
+
+Searching for one student among 10 lakh students takes more time.
+
+Optimization helps retrieve the required student quickly.
+
+
+Why is Optimization Important?
+• Retrieves data faster.
+• Reduces waiting time.
+• Makes the database work efficiently.
+• Handles large amounts of data easily.
+• Provides a better user experience.
+
+Optimization techniques
+1. Indexing
+   Creates a shortcut to find data quickly.
+
+2. Query Optimization
+   Writing SQL queries in a better way so they run faster.
+
+3. Normalization
+   Organizing data into multiple related tables to reduce duplicate data.
+
+4. Proper Database Design
+   Designing tables and relationships correctly from the beginning.
+
+5. Retrieve Only Required Data
+   Fetch only the columns and rows you need instead of the entire table.
+
+Example:
+Instead of asking for all student details,
+
+SELECT *
+
+Ask only for the required column,
+
+SELECT Name
+
+This is faster.
+
+--------------------------------------------------------------------------------
+===============================================================================
+15. SQL (STRUCTURED QUERY LANGUAGE)
+===============================================================================
+
+SQL (Structured Query Language) is the standard language used to communicate
+with Relational Database Management Systems (RDBMS).
+
+It is used to create, store, retrieve, update, delete, and manage data in
+relational databases.
+
+• In 1970, Dr. Edgar F. Codd introduced the Relational Model for databases.
+
+• IBM developed a language called SEQUEL
+  (Structured English Query Language) to work with relational databases.
+
+• Later, SEQUEL was renamed to SQL
+  (Structured Query Language).
+
+• Today, SQL is the standard language used by relational database systems
+  such as MySQL, Oracle Database, Microsoft SQL Server, and PostgreSQL.
+
+===============================================================================
+WHAT IS MySQL?
+===============================================================================
+MySQL stands for "My Structured Query Language."
+MySQL is an open-source Relational Database Management System (RDBMS) software
+that uses SQL to store, retrieve, and manage data.
+
+SQL → Language
+MySQL → Software that understands SQL commands
+
+===============================================================================
+WHAT CAN SQL DO?
+===============================================================================
+
+SQL helps users to:
+
+• Create databases.
+• Create tables.
+• Insert (Store) data.
+• Retrieve (View) data.
+• Update (Modify) existing data.
+• Delete unwanted data.
+• Analyze data using reports and calculations.
+• Control user access and permissions.
+
+===============================================================================
+ADVANTAGES OF SQL
+===============================================================================
+
+• Easy to learn and use.
+• Handles large amounts of data efficiently.
+• Retrieves data quickly.
+• Standard language supported by almost all RDBMS.
+• Provides data security through user permissions.
+• Works with multiple database systems.
+
+===============================================================================
+WHERE IS SQL USED?
+===============================================================================
+
+• Websites
+• Business Applications
+• Banking Systems
+• E-commerce Platforms
+• Hospitals
+• Educational Institutions
+• Inventory Management Systems
+• Payroll Systems
+
+===============================================================================
+REAL-TIME EXAMPLE
+===============================================================================
+
+College Management System
+
+Using SQL, we can:
+
+• Create a Students table.
+• Store student records.
+• Search for a student.
+• Update student information.
+• Delete inactive student records.
+• Generate reports such as total students, average marks, etc.
+
+===============================================================================
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,392 @@
+CTAS & Views
+
+==========================================================
+CTAS (CREATE TABLE AS SELECT)
+==========================================================
+
+1. WHAT IS CTAS?
+----------------------------------------------------------
+
+CTAS stands for CREATE TABLE AS SELECT.
+
+It is used to create a new table using the result of a SELECT query.
+i.e whenever we want to take the back ups.
+
+when you are deleting something, u need to take back up first. 
+
+Simple Definition:
+CTAS creates a new table and copies data from an existing table.
+
+Syntax:
+create table new_table as select * from existing table;
+
+CREATE TABLE new_table AS
+SELECT column1, column2
+FROM existing_table
+WHERE condition;
+
+CTAS is used to create a new table by copying data from an existing table using a SELECT query.
+
+CREATE TABLE Employees (
+emp_id INT,
+name VARCHAR(50),
+salary INT,
+department VARCHAR(50)
+);
+
+INSERT INTO Employees VALUES
+(1, 'Ravi', 50000, 'IT'),
+(2, 'Anu', 60000, 'HR'),
+(3, 'Kiran', 45000, 'IT'),
+(4, 'Meena', 70000, 'Finance'),
+(5, 'Arjun', 55000, 'HR'),
+(6, 'Divya', 80000, 'IT');
+
+select * from Employees;
+
+create table Employees_new as select * from Employees;
+----------------------------------------------------------
+
+2. WHY CTAS?
+----------------------------------------------------------
+
+We use CTAS when:
+
+- We want to quickly create a new table
+- We need a copy of existing data
+- We want to filter or transform data while creating table
+- We want to work on data without affecting original table
+- We want faster query performance by storing results
+
+----------------------------------------------------------
+
+3. ADVANTAGES OF CTAS
+----------------------------------------------------------
+
+1. Fast Table Creation
+- Creates table and inserts data in one step
+- Saves time
+
+2. Data Backup
+- Helps to take snapshot of data
+- Useful before delete/update operations
+
+3. Data Filtering
+- Can copy only required data using WHERE condition
+
+4. Better Performance
+- Avoid running complex queries repeatedly
+- Store results and reuse
+
+5. Safe Testing
+- Work on copied data without risk
+
+6. Data Transformation
+- Can modify data while copying (calculations, aliases)
+
+7. Reduces Query Complexity
+- Store results once and use simple queries later
+
+----------------------------------------------------------
+
+4. REAL LIFE EXAMPLE
+----------------------------------------------------------
+
+Scenario:
+A company has a large Employees table.
+Manager wants a list of only high salary employees.
+
+Instead of running query again and again:
+
+CTAS is used to create a separate table.
+
+Original Table → Full Data
+CTAS Table → Only Required Data
+
+Example:
+CREATE TABLE high_salary_emp AS
+SELECT * FROM Employees
+WHERE salary > 50000;
+
+----------------------------------------------------------
+
+5. IMPORTANT NOTE (LIMITATION)
+----------------------------------------------------------
+
+CTAS does NOT copy:
+- Primary Key
+- Foreign Key
+- Indexes
+- Constraints
+
+It only copies:
+- Column names
+- Data
+- Basic data types
+
+----------------------------------------------------------
+
+6. EXAMPLES
+----------------------------------------------------------
+
+Example 1: Copy Full Table
+CREATE TABLE emp_copy AS
+SELECT * FROM Employees;
+
+----------------------------------------------------------
+
+Example 2: Copy Selected Columns
+CREATE TABLE emp_names AS
+SELECT name FROM Employees;
+
+----------------------------------------------------------
+
+Example 3: Copy with Condition
+CREATE TABLE rich_emp AS
+SELECT * FROM Employees
+WHERE salary > 50000;
+
+----------------------------------------------------------
+Create a back up table with only the structure but no data.
+  
+Example 4: Create Empty Table (Structure Only)
+CREATE TABLE empty_emp AS
+SELECT * FROM Employees WHERE 1=0;
+
+desc empty_emp;
+
+---Create Empty Table (Structure & data Only)
+CREATE TABLE empty_emp5 AS
+select * from employees where 1=1;
+
+CREATE TABLE empty_emp2 AS select * from employees where 1=8; false, so it wont copy..
+
+----------------------------------------------------------
+
+Example 5: Data Transformation
+
+CREATE TABLE emp_bonus AS
+SELECT emp_id, salary * 1.1 AS new_salary
+FROM Employees;
+
+----------------------------------------------------------
+
+==========================================================
+VIEWS IN MYSQL
+==========================================================
+
+1. WHAT IS A VIEW?
+----------------------------------------------------------
+
+A view is a virtual table in SQL — it doesn’t store data itself but shows data from one or more tables 
+based on a SELECT query.
+It behaves like a real table but data is filtered depending on how it’s created.
+
+A View is a virtual table created using a SELECT query.
+
+Why use Views?
+
+To simplify complex queries
+To restrict access to certain columns (for security)
+To present data in a specific format for reports
+To make queries easier to reuse
+
+Types of views - Simple & complex
+
+Simple views - Created from a single table, no functions or groupings. Can often be updated.
+
+Complex views - Created from multiple tables using joins, group functions, or subqueries. 
+complex views are usually NOT updatable
+
+wen we need data from multiple tables & wen we want summarized data (reports)
+
+It does not store data physically.
+Instead, it stores only the query.
+
+Simple Definition:
+A View is a saved query that acts like a table.
+
+Syntax:
+CREATE VIEW view_name AS
+SELECT column1, column2
+FROM table_name
+WHERE condition;
+
+A View is a virtual table that stores a SELECT query and shows updated data from the base table.
+
+For a view:
+
+CREATE VIEW emp_view AS
+SELECT * FROM employees;
+
+The database stores something like:
+
+View Name: emp_view
+
+Definition:
+SELECT * FROM employees;
+
+Notice there are no employee rows stored—only the SQL statement.
+----------------------------------------------------------
+
+2. WHY VIEWS?
+----------------------------------------------------------
+
+We use Views when:
+
+- We want to simplify complex queries
+- We want to restrict access to specific data
+- We want to reuse frequently used queries
+- We want to show only required columns to users
+- We want always updated (live) data
+
+----------------------------------------------------------
+
+3. ADVANTAGES OF VIEWS
+----------------------------------------------------------
+
+1. Simplifies Complex Queries
+- Store long queries once
+- Use simple SELECT later
+
+2. Security
+- Restrict access to sensitive data
+- Show only required columns
+
+3. Always Updated Data
+- View shows latest data from base table
+
+4. Reusability
+- Write once, use many times
+
+5. Data Abstraction
+- Hide table complexity from users
+
+6. No Extra Storage
+- Does not store data physically
+
+----------------------------------------------------------
+
+4. REAL LIFE EXAMPLE
+----------------------------------------------------------
+
+Scenario:
+A company has an Employees table with many columns:
+(emp_id, name, salary, department, password)
+
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    salary INT,
+    department VARCHAR(50),
+    password VARCHAR(100)
+);
+
+INSERT INTO Employees VALUES
+(1, 'Ravi', 50000, 'IT', 'ravi@123'),
+(2, 'Anu', 60000, 'HR', 'anu@456'),
+(3, 'Kiran', 75000, 'IT', 'kiran@789'),
+(4, 'Sneha', 80000, 'Finance', 'sneha@111'),
+(5, 'Amit', 55000, 'HR', 'amit@222'),
+(6, 'Neha', 90000, 'Finance', 'neha@333'),
+(7, 'Raj', 65000, 'IT', 'raj@444'),
+(8, 'Priya', 70000, 'HR', 'priya@555');
+
+HR should see all data,
+but employees should only see (emp_id, name, department)
+
+So we create a View:
+
+CREATE VIEW emp_public_view AS
+SELECT emp_id, name, department
+FROM Employees;
+
+Now users can query:
+SELECT * FROM emp_public_view;
+
+----------------------------------------------------------
+
+5. IMPORTANT NOTES / LIMITATIONS
+----------------------------------------------------------
+
+- View does NOT store data
+- Depends on base table
+- If base table is dropped → view becomes invalid
+
+Some Views are NOT updatable when:
+- Using JOIN
+- Using GROUP BY
+- Using aggregate functions (SUM, COUNT)
+- Using DISTINCT
+
+----------------------------------------------------------
+
+6. Simple View -EXAMPLES
+----------------------------------------------------------
+
+Example 1: 
+CREATE VIEW emp_view AS
+SELECT emp_id, name FROM Employees;
+
+SELECT * FROM emp_view;
+
+DROP VIEW emp_view;
+
+----------------------------------------------------------
+
+Example 2: View with Condition
+CREATE VIEW high_salary_view AS
+SELECT * FROM Employees
+WHERE salary > 50000;
+
+----------------------------------------------------------
+
+Example 3: View with Calculation
+CREATE VIEW emp_bonus_view AS
+SELECT emp_id, salary, salary * 1.1 AS new_salary
+FROM Employees;
+
+==========================================================
+
+7. Complex View -EXAMPLES
+----------------------------------------------------------
+
+CREATE TABLE Departments (
+    department_id INT PRIMARY KEY,
+    department_name VARCHAR(50)
+);
+
+INSERT INTO Departments VALUES
+(101, 'IT'),
+(102, 'HR'),
+(103, 'Finance');
+
+Example 1: Show employee name, salary, and department name
+
+CREATE VIEW emp_dept_view AS
+SELECT E.emp_id, E.name, E.salary, D.department_name
+FROM Employees E
+JOIN Departments D
+ON E.department = D.department_name;
+
+
+----------------------------------------------------------
+
+Example 2: Show department-wise average salary
+
+CREATE VIEW dept_avg_salary AS
+SELECT department, AVG(salary) AS avg_salary
+FROM Employees
+GROUP BY department;
+
+--------------------------------------------------------------
+
+The main difference between CTAS (CREATE TABLE AS SELECT) and Views is how and where the data is stored.
+
+| Feature                                 | CTAS (CREATE TABLE AS SELECT) | View                               |
+| --------------------------------------- | ----------------------------- | ---------------------------------- |
+| Data stored physically?                 | ✅ Yes                         | ❌ No (normally)                    |
+| Occupies disk space?                    | ✅ Yes                         | Only the view definition is stored |
+| Stores query?                           | No                            | ✅ Yes                              |
+| Gets updated when source table changes? | ❌ No                          | ✅ Yes (shows latest data)          |
+| Can insert/update data?                 | Yes, on the new table         | Depends on the view                |

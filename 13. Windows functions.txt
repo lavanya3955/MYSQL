@@ -1,0 +1,251 @@
+WINDOW FUNCTIONS (MySQL)
+------------------------------------------------------------------------------------------------------------
+What are Window Functions?
+
+Window functions perform calculations across a set of rows related to the current row, without grouping the data.
+They do NOT reduce rows like GROUP BY.
+
+“The window functions are used with OVER clause  to perform calculations like rank, 
+running total, or average on a set of rows related to the current row, without combining or grouping the rows.”
+
+
+Simple Meaning:
+Apply a function on a group of rows → but still show each row separately
+------------------------------------------------------------------------------------------------------------
+Syntax:
+
+SELECT column_name,
+function() OVER (PARTITION BY column ORDER BY column)
+FROM table_name;
+------------------------------------------------------------------------------------------------------------
+Key Concepts
+
+OVER() → defines window (group of rows)
+PARTITION BY → divides rows into groups
+ORDER BY → defines order within group
+------------------------------------------------------------------------------------------------------------
+
+Types of Window Functions
+
+1.ROW_NUMBER() - Assigns a unique sequential number to each row.
+2.RANK()- Assigns rank to rows, skipping numbers when there are ties.
+3.DENSE_RANK() -Assigns rank to rows without skipping numbers in case of ties.
+
+4.SUM() OVER()-Calculates total or running sum across rows.
+5.AVG() OVER()- Calculates average value across rows.
+6.COUNT() OVER() -Counts number of rows in the window.
+
+7.LAG()- Fetches value from the previous row.
+8.LEAD()- Fetches value from the next row.
+
+9.NTILE(n) - divides rows into n equal groups and assigns a bucket number from 1 to n.
+It creates n bins with equal number of rows
+
+Binning is the process of grouping data into ranges or categories to simplify analysis.
+
+Bin 1 → Top salaries (High)
+Bin 2 → Middle salaries
+Bin 3 → Low salaries
+
+"RANK() - Gives a position number to each row based on a column (like salary).
+If two rows tie, they get the same rank, but the next rank is skipped."
+
+"DENSE_RANK() - Works like RANK(), but does not skip ranks.
+Ties get the same rank, but the next rank continues consecutively."
+
+LAG() and LEAD()
+Salary Comparison- Compare employee salary with previous employee or Find next employee’s salary
+Day-to-Day Sales Analysis - Compare today’s sales with yesterday
+Ranking Comparison - Compare with next person
+------------------------------------------------------------------------------------------------------------
+
+Types of Window Functions
+
+
+Sample Table
+
+CREATE TABLE Employees (
+emp_id INT,
+name VARCHAR(50),
+department VARCHAR(50),
+salary INT
+);
+
+INSERT INTO Employees VALUES
+(1, 'Ravi', 'IT', 50000),
+(2, 'Anu', 'HR', 60000),
+(3, 'Kiran', 'IT', 45000),
+(4, 'Meena', 'Finance', 70000),
+(5, 'Arjun', 'HR', 55000),
+(6, 'Divya', 'IT', 80000);
+
+INSERT INTO Employees VALUES
+(7, 'Sneha', 'IT', 70000),
+(8, 'Rahul', 'HR', 60000),
+(9, 'Pooja', 'Finance', 50000);
+
+INSERT INTO Employees VALUES
+(10, 'Sujit', 'IT', 80000),
+(11, 'Ramya', 'HR', 60000);
+
+------------------------------------------------------------------------------------------------------------
+ROW_NUMBER()
+
+------------------------------------------------------------------------------------------------------------
+Q1. Assign row numbers to employees based on salary (highest to lowest)
+Solution:
+SELECT name, salary,
+ROW_NUMBER() OVER (ORDER BY salary DESC) AS row_num
+FROM Employees;
+
+Q2. Assign row numbers to employees within each department
+Solution:
+SELECT name, department, salary,
+ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS row_num
+FROM Employees;
+
+-- to get the row num in first column
+SELECT 
+ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS row_num, name, department, salary
+FROM Employees;
+---------------------------------------------------------------------------------------------
+RANK()
+------------------------------------------------------------------------------------------------------------
+
+Q1. Rank employees based on salary (highest first)
+Solution:
+SELECT name, salary,
+RANK() OVER (ORDER BY salary DESC) AS rank_num
+FROM Employees;
+
+Q2. Rank employees within each department based on salary
+Solution:
+SELECT name, department, salary,
+RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS rank_num
+FROM Employees;
+
+
+------------------------------------------------------------------------------------------------------------
+DENSE_RANK()
+------------------------------------------------------------------------------------------------------------
+
+Q1. Assign dense rank to employees based on salary
+Solution:
+SELECT name, salary,
+DENSE_RANK() OVER (ORDER BY salary DESC) AS denserank
+FROM Employees;
+
+Q2. Assign dense rank to employees within each department
+Solution:
+SELECT name, department, salary,
+DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS denserank
+FROM Employees;
+
+------------------------------------------------------------------------------------------------------------
+SUM() OVER()
+------------------------------------------------------------------------------------------------------------
+
+Q1. Calculate running total of salary
+Solution:
+SELECT name, salary,
+SUM(salary) OVER (ORDER BY salary) AS running_total
+FROM Employees;
+
+By default, MySQL applies this frame:
+
+RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+
+UNBOUNDED PRECEDING
+Means: “Unbounded” = no limit , start from the very first row in the ordered result
+
+CURRENT ROW
+Means: stop at the current row you are calculating for
+
+It groups all rows with the same ORDER BY value together
+So for salary = 50000, both Ravi and Pooja are treated as one group,one range
+
+45000 → Kiran
+50000 → Ravi, Pooja  (same group!)
+
+SELECT name, salary,
+SUM(salary) OVER (ORDER BY salary ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total
+FROM Employees;
+
+RANGE (default) → groups same values → causes jumps
+ROWS → processes row-by-row → gives expected running total
+
+SELECT name, salary,
+SUM(salary) OVER (ORDER BY salary desc ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total
+FROM Employees;
+
+Q2. Calculate total salary for each department
+Solution:
+SELECT name, department, salary,
+SUM(salary) OVER (PARTITION BY department ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS dept_total
+FROM Employees;
+
+------------------------------------------------------------------------------------------------------------
+AVG() OVER()
+------------------------------------------------------------------------------------------------------------
+
+Q1. Show average salary along with each employee
+Solution:
+SELECT name, salary,
+AVG(salary) OVER () AS avg_salary
+FROM Employees;
+
+Q2. Running Avg
+
+SELECT 
+    name,
+    salary,department,
+    AVG(salary) OVER ( PARTITION BY department
+        ORDER BY salary
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_avg
+FROM employees;
+
+
+
+Q2. Show department-wise average salary for each employee
+Solution:
+SELECT name, department, salary,
+AVG(salary) OVER (PARTITION BY department) AS dept_avg
+FROM Employees;
+
+------------------------------------------------------------------------------------------------------------
+COUNT() OVER()
+------------------------------------------------------------------------------------------------------------
+
+Q1. Count total number of employees
+Solution:
+SELECT name,
+COUNT(*) OVER () AS total_employees
+FROM Employees;
+
+Q2. Count number of employees in each department
+Solution:
+SELECT name, department,
+COUNT(*) OVER (PARTITION BY department) AS dept_count
+FROM Employees;
+
+SELECT *,
+COUNT(*) OVER (
+    PARTITION BY department 
+    ORDER BY salary DESC
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+) AS running_count
+FROM Employees;
+
+
+SELECT *,
+COUNT(*) OVER (
+    PARTITION BY department 
+    ORDER BY salary DESC
+    ) AS running_count
+FROM Employees;
+
+-----
+SELECT distinct department,
+COUNT(*) OVER (PARTITION BY department) AS dept_count
+FROM Employees;

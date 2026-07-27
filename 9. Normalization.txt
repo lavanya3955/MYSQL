@@ -1,0 +1,400 @@
+--------------------------------------------------------------------------------------
+NORMALIZATION
+--------------------------------------------------------------------------------------
+
+What is Normalization? (Simple)
+
+Normalization means organizing data in tables to avoid duplication and keep data clean
+
+Easy to manage
+No confusion
+Save storage
+
+Think of a school register:
+
+Instead of writing full student details again and again
+You store once and use IDs
+
+Types of Normalization:
+1NF: First Normal Form : Ensures each column has single (atomic) values
+ (no multiple values like 'Laptop, Mouse')
+
+2NF: Ensures all columns depend on the full primary key (no partial dependency)
+A column should depend on the whole primary key, not just part of it
+i.e, Only when you have a composite primary key..
+
+*A table can have only one primary key, but that key can consist of multiple columns (composite key).
+
+3NF: Ensures columns depend only on the primary key, not on other non-key columns (no indirect dependency)
+A column should depend only on the primary key not through another column
+i.e, Non-key column should not depend on another non-key column
+
+Example (With Problem)
+Table:
+emp_id	dept_id	dept_name
+1	101	HR
+2	102	IT
+
+Primary Key = emp_id
+
+emp_id	dept_id	
+1	101	
+2	102	
+
+emp_id	dept_name
+1	HR
+2	IT
+
+others :BCNF(Boyce-Codd Normal Form),4NF,5NF
+----------------------------------------------------------------------------------------------------------------
+Composite Primary Key – Meaning
+
+A Composite Primary Key is a primary key made using more than one column.
+
+It means:
+
+A single column alone cannot uniquely identify a row but combination of columns can..
+
+Two or more columns together act as a primary key.
+
+CREATE TABLE Orders (
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    PRIMARY KEY (order_id, product_id)
+);
+
+INSERT INTO Orders VALUES
+(1, 101, 2),
+(1, 102, 1),
+(2, 101, 5);
+
+order_id alone → ❌ not unique
+product_id alone → ❌ not unique
+(order_id + product_id) together → ✅ unique
+
+
+One order can have multiple products
+Same product can appear in multiple orders
+
+So we combine:
+✔ order_id
+✔ product_id
+
+to uniquely identify each row.
+
+Important Rules:
+Cannot contain NULL values
+Combination must be unique
+Used when single column is not enough
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+Start with a messy table
+
+Before Normalization
+
+StudentID	Name	Courses
+1		Ravi	SQL, Python
+2		Anu	Java
+3		Kiran	SQL, Java
+
+Problem:One column has multiple values & Hard to search/filter
+
+1NF (First Normal Form-  One value per cell -
+1NF Rule- Each column should contain only single (atomic) values
+
+After 1NF
+
+StudentID	Name	Course
+1		Ravi	SQL
+1		Ravi	Python
+2		Anu	Java
+3		Kiran	SQL
+3		Kiran	Java
+
+After doing 1NF problem is : Name is repeating (Ravi, Kiran)
+
+Now: Can we uniquely identify each row using StudentID???
+
+no, studentid repeats and course also repeats.
+
+here one column is not enough to make primary key so we combine 2 columns - PRIMARY KEY (StudentID, Course)
+
+that is wat we call as composite primary key.
+
+explanation... One student can take multiple courses 
+One course can have many students 
+
+So, StudentID alone is not enough 
+Course alone is not enough 
+
+combine (StudentID + Course) together IS unique
+
+each row is unique:
+
+(1, SQL)
+(1, Python)
+(3, Java)
+
+this we call as composite primary key - [Primary Key = (StudentID, Course)]-individual columns can repeat, but their combination must always be unique.
+--------------------------------------------------------------------------------------------------------------------------------------------------
+1NF pracical Example:
+
+CREATE TABLE Legacy_Order_Data (
+    order_id INT,
+    customer_name VARCHAR(100),
+    products VARCHAR(255)
+);
+
+INSERT INTO Legacy_Order_Data VALUES
+(1, 'Ravi Kumar', 'Laptop, Mouse'),
+(2, 'Anita Sharma', 'Headphones'),
+(3, 'Ravi Kumar', 'Keyboard, Mouse');
+
+
+convert this to new table 1nf.. split the data manaually
+
+CREATE TABLE Orders_1NF (
+    order_id INT,
+    customer_name VARCHAR(100),
+    product VARCHAR(100)
+);
+
+
+
+INSERT INTO Orders_1NF VALUES
+(1, 'Ravi Kumar', 'Laptop'),
+(1, 'Ravi Kumar', 'Mouse'),
+(2, 'Anita Sharma', 'Headphones'),
+(3, 'Ravi Kumar', 'Keyboard'),
+(3, 'Ravi Kumar', 'Mouse');
+
+Each product is now stored in a separate row, so every column has only one value — that’s 1NF.
+
+
+--------------------------------------------------------------------------------------
+🔹 2NF (Second Normal Form)- Remove partial dependency
+
+Simple meaning:Don’t repeat unnecessary data
+
+CREATE TABLE Student_Courses (
+    student_id INT,
+    name VARCHAR(50),
+    course VARCHAR(50)
+);
+
+INSERT INTO Student_Courses VALUES
+(1, 'Ravi', 'SQL'),
+(1, 'Ravi', 'Python'),
+(2, 'Anu', 'Java'),
+(3, 'Kiran', 'SQL'),
+(3, 'Kiran', 'Java');
+
+| student_id | name  | course |
+| ---------- | ----- | ------ |
+| 1          | Ravi  | SQL    |
+| 1          | Ravi  | Python |
+| 2          | Anu   | Java   |
+| 3          | Kiran | SQL    |
+| 3          | Kiran | Java   |
+
+Composite Key = (student_id, course)
+
+Problem:
+name depends only on student_id
+NOT on full key
+So:
+Partial Dependency exists
+Also: Name is repeated again & again
+
+
+After 2NF (Split tables)
+
+Table 1: Students
+
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+INSERT INTO Students VALUES
+(1, 'Ravi'),
+(2, 'Anu'),
+(3, 'Kiran');
+
+StudentID	Name
+1		Ravi
+2		Anu
+3		Kiran
+
+Primary Key = student_id (single column)
+
+Because:
+
+Each student has only one name
+name fully depends on student_id
+
+Table 2: Courses
+
+CREATE TABLE Courses (
+    student_id INT,
+    course VARCHAR(50),
+    PRIMARY KEY (student_id, course)
+);
+
+INSERT INTO Courses VALUES
+(1, 'SQL'),
+(1, 'Python'),
+(2, 'Java'),
+(3, 'SQL'),
+(3, 'Java');
+
+StudentID	Course
+1		SQL
+1		Python
+2		Java
+3		SQL
+3		Java
+
+Primary Key = (student_id, course) ✅
+
+
+A student can have multiple courses
+A course can belong to multiple students
+
+👉 So here we still need composite key
+
+2NF = 1NF + No Partial Dependency
+
+Now:
+No repeated names
+Data is cleaner
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+🔹 3NF (Third Normal Form) – Remove Indirect Dependency
+
+Simple meaning:
+No column should depend on another non-key column
+Every column should depend only on the primary key
+
+------------------------------------------------------------
+
+BEFORE 3NF (Problem Table)
+
+CREATE TABLE Students1 (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    dept_id INT,
+    dept_name VARCHAR(50)
+);
+
+INSERT INTO Students1 VALUES
+(1, 'Ravi', 101, 'CS'),
+(2, 'Anu', 102, 'IT'),
+(3, 'Kiran', 101, 'CS');
+
+Output:
+
+student_id | name  | dept_id | dept_name
+-----------------------------------------
+1          | Ravi  | 101     | CS
+2          | Anu   | 102     | IT
+3          | Kiran | 101     | CS
+
+------------------------------------------------------------
+
+Problem:
+
+Primary Key = student_id
+
+dept_name depends on dept_id
+dept_id depends on student_id
+
+student_id → name, dept_id
+dept_id → dept_name
+
+So:
+student_id → dept_id → dept_name
+
+This is called Indirect (Transitive) Dependency
+
+Also:
+Dept names are repeated multiple times
+
+------------------------------------------------------------
+
+AFTER 3NF (Solution – Split Tables)
+
+Table 1: Students
+
+CREATE TABLE Students2 (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    dept_id INT
+);
+
+INSERT INTO Students2 VALUES
+(1, 'Ravi', 101),
+(2, 'Anu', 102),
+(3, 'Kiran', 101);
+
+Output:
+
+student_id | name  | dept_id
+--------------------------------
+1          | Ravi  | 101
+2          | Anu   | 102
+3          | Kiran | 101
+
+
+dept_id | dept_name
+--------------------
+101     | CS
+102     | IT
+
+------------------------------------------------------------
+
+Table 2: Departments
+
+CREATE TABLE Departments (
+    dept_id INT PRIMARY KEY,
+    dept_name VARCHAR(50)
+);
+
+INSERT INTO Departments VALUES
+(101, 'CS'),
+(102, 'IT');
+
+Output:
+
+dept_id | dept_name
+--------------------
+101     | CS
+102     | IT
+
+------------------------------------------------------------
+
+Final Understanding:
+
+Now:
+student_id → dept_id
+dept_id → dept_name (in separate table)
+
+No indirect dependency
+No repeated data
+Data is cleaner
+
+------------------------------------------------------------
+
+Definition:
+
+3NF = 2NF + No Indirect Dependency
+
+------------------------------------------------------------
+
+Remember:
+
+1NF → Single values
+2NF → No partial dependency
+3NF → No indirect dependency

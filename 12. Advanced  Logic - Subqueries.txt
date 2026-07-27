@@ -1,0 +1,677 @@
+--------------------------------------------------------------------------------------
+Subquery
+--------------------------------------------------------------------------------------
+A subquery (also called an inner query or nested query) is a query written inside another SQL query.
+It is used when the result of one query is needed to perform another query.
+
+First do a small task → then use that result to complete the main task
+Example: Find class average & Then find students who scored above average
+--------------------------------------------------------------------------------------
+Types of Subqueries:
+1. Single-row Subquery - Returns only one value
+2. Multi-row Subquery-Returns multiple values
+3. Nested Subquery-A subquery inside another subquery (multiple levels)
+
+-----------------------------------------------------------------------------------
+Single-row Subquery/ Scalar Subquery 
+--------------------------------------------------------------------------------------
+A scalar subquery is simply: a subquery that returns exactly ONE value (one row, one column)
+Why:We use it when we need a single calculated value and want to use it inside another query.
+
+“Give me one answer → I will use it”
+--------------------------------------------------------------------------------------
+
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    marks INT,
+    department VARCHAR(20)
+);
+
+INSERT INTO Students VALUES
+(1, 'Amit',   85, 'CS'),
+(2, 'Sneha',  92, 'IT'),
+(3, 'Ravi',   70, 'CS'),
+(4, 'Priya',  88, 'ECE'),
+(5, 'Kiran',  60, 'IT'),
+(6, 'Neha',   95, 'CS'),
+(7, 'Arjun',  75, 'ECE'),
+(8, 'Divya',  82, 'MECH'),
+(9, 'Rahul',  78, 'MECH'),
+(10,'Pooja',  91, 'IT');
+
+
+--- Scalar Subquery (SELECT)
+Q1.Show each student's name, marks, and the overall average marks.
+
+SELECT
+    name,
+    marks,
+    (SELECT AVG(marks) FROM Students) AS avg_marks
+FROM Students;
+
+Q2.Show employees along with maximum salary in the company
+
+SELECT
+    name,
+    marks,
+    (SELECT MAX(marks) FROM Students) AS highest_marks
+FROM Students;
+
+--- Scalar Subquery (where)
+1.Retrieve the names and marks of all employees who have scored less than the highest marks in the table.
+
+SELECT name, marks 
+FROM students
+WHERE marks < (SELECT MAX(marks) FROM students);
+
+2.Retrieve the names and marks of all employees who have scored greater than the average marks in the table.
+
+SELECT name, marks
+FROM Students
+WHERE marks > (SELECT AVG(marks) FROM Students);
+
+3.Find the student(s) with highest marks.
+
+SELECT name, marks
+FROM Students
+WHERE marks = (SELECT MAX(marks) FROM Students);
+
+4.Find the student(s) with lowest marks.
+
+SELECT name, marks
+FROM Students
+WHERE marks = (SELECT MIN(marks) FROM Students);
+
+--------------------------------------------------------------------------------------
+2. Multi-row Subquery - Returns multiple values
+---------------------------------------------------------------------------------------
+“Give me a list → I will check from that list”
+
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    marks INT,
+    department VARCHAR(20)
+);
+
+INSERT INTO Students VALUES
+(1, 'Amit',   85, 'CS'),
+(2, 'Sneha',  92, 'IT'),
+(3, 'Ravi',   70, 'CS'),
+(4, 'Priya',  88, 'ECE'),
+(5, 'Kiran',  60, 'IT'),
+(6, 'Neha',   95, 'CS'),
+(7, 'Arjun',  75, 'ECE'),
+(8, 'Divya',  82, 'MECH'),
+(9, 'Rahul',  78, 'MECH'),
+(10,'Pooja',  91, 'IT'),
+(11,'Sharath', 85, 'IT');
+
+
+INSERT INTO Students VALUES (11,'Sharath', 85, 'IT');
+1. Find all students from departments where marks are greater than 90.
+
+SELECT name, marks, department
+FROM Students
+WHERE department IN (
+SELECT department
+FROM Students
+WHERE marks > 90
+);
+
+-----------------------------------
+
+2. Find all students who are NOT in CS department.
+
+SELECT name, department
+FROM Students
+WHERE department NOT IN (
+SELECT department
+FROM Students
+WHERE department = 'CS'
+);
+
+-----------------------------------------------------------------------
+3. Find all students whose marks match any student from CS department.
+
+SELECT name, marks
+FROM Students
+WHERE marks IN (
+SELECT marks
+FROM Students
+WHERE department = 'CS'
+);
+
+------------------------------------------------------------------------
+Multi-row Subquery using 2 tables:
+---------------------------------------------------------------------------
+CREATE TABLE Employees (
+    emp_id INT,
+    name VARCHAR(50),
+    dept_id INT
+);
+
+CREATE TABLE Departments (
+    dept_id INT,
+    location VARCHAR(50)
+);
+
+INSERT INTO Employees VALUES
+(1, 'Ravi', 10),
+(2, 'Anu', 20),
+(3, 'Kiran', 30),
+(4, 'Meena', 10);
+
+INSERT INTO Departments VALUES
+(10, 'Bangalore'),
+(20, 'Chennai'),
+(30, 'Bangalore');
+
+| emp_id | name  | dept_id |
+| ------ | ----- | ------- |
+| 1      | Ravi  | 10      |
+| 2      | Anu   | 20      |
+| 3      | Kiran | 30      |
+| 4      | Meena | 10      |
+
+| dept_id | location  |
+| ------- | --------- |
+| 10      | Bangalore |
+| 20      | Chennai   |
+| 30      | Bangalore |
+
+4.Retrieve the names of employees who work in departments located in Bangalore.
+SELECT name,dept_id
+FROM Employees
+WHERE dept_id IN (
+    SELECT dept_id 
+    FROM Departments 
+    WHERE location = 'Bangalore'
+);
+
+------------------------------------------------------------------------
+Multi-row Subquery with Joins (same above tables)
+------------------------------------------------------------------------
+5.Retrieve the names of employees along with their department location who work in departments
+located in
+ Bangalore.
+
+SELECT e.name, d.location, d.dept_id
+FROM Employees e
+JOIN Departments d
+ON e.dept_id = d.dept_id
+WHERE e.dept_id IN (
+    SELECT dept_id
+    FROM Departments
+    WHERE location = 'Bangalore'
+);
+-----------------------------------------------------------------------------------
+Another example for Multi-row Subquery with Joins (students-departments1 table)
+-----------------------------------------------------------------------------------
+
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    marks INT,
+    department VARCHAR(20)
+);
+
+INSERT INTO Students VALUES
+(1, 'Amit',   85, 'CS'),
+(2, 'Sneha',  92, 'IT'),
+(3, 'Ravi',   70, 'CS'),
+(4, 'Priya',  88, 'ECE'),
+(5, 'Kiran',  60, 'IT'),
+(6, 'Neha',   95, 'CS'),
+(7, 'Arjun',  75, 'ECE'),
+(8, 'Divya',  82, 'MECH'),
+(9, 'Rahul',  78, 'MECH'),
+(10,'Pooja',  91, 'IT');
+
+CREATE TABLE Departments1 (
+    dept_id INT PRIMARY KEY,
+    department_name VARCHAR(30)
+);
+
+INSERT INTO Departments1 VALUES
+(101, 'CS'),
+(102, 'IT'),
+(103, 'ECE'),
+(104, 'MECH'),
+(105, 'EEE');
+
+6.Retrieve the names of students along with their department names who belong to departments 
+having at least one student with marks greater than 80.
+
+SELECT s.name, d.department_name
+FROM Students s
+JOIN Departments1 d
+ON s.department = d.department_name
+WHERE d.department_name IN (
+    SELECT department
+    FROM Students
+    WHERE marks > 80
+);
+
+--------------------------------------------------------------------------------------
+3. Nested Subquery - A subquery inside another subquery (multiple levels)
+--------------------------------------------------------------------------------------
+“Query inside query inside query”
+
+Main Query
+   → Subquery
+       → Subquery (again)
+--------------------------------------------------------------------------------
+
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    marks INT,
+    department VARCHAR(20)
+);
+
+INSERT INTO Students VALUES
+(1, 'Amit',   85, 'CS'),
+(2, 'Sneha',  92, 'IT'),
+(3, 'Ravi',   70, 'CS'),
+(4, 'Priya',  88, 'ECE'),
+(5, 'Kiran',  60, 'IT'),
+(6, 'Neha',   95, 'CS'),
+(7, 'Arjun',  75, 'ECE'),
+(8, 'Divya',  82, 'MECH'),
+(9, 'Rahul',  78, 'MECH'),
+(10,'Pooja',  91, 'IT');
+
+1.Third highest marks..............
+
+SELECT MAX(marks) AS Third_Highest_Marks
+FROM Students
+WHERE marks < (
+    SELECT MAX(marks)
+    FROM Students
+    WHERE marks < (
+        SELECT MAX(marks)
+        FROM Students
+    )
+);
+--------------------------------------------------------------------------------------
+2.Find all the students from the department of the highest scorer.
+
+SELECT name, department
+FROM Students
+WHERE department = (
+    SELECT department
+    FROM Students
+    WHERE marks = (
+        SELECT MAX(marks)
+        FROM Students
+    )
+);
+
+explanation:
+
+SELECT MAX(marks) FROM Students;
+95
+
+SELECT department
+FROM Students
+WHERE marks = 95;
+CS
+
+SELECT name,department,marks
+FROM Students
+WHERE department = 'CS';
+
+----------------------------------------------------------------------------------------------------------
+Nested Subquery - With different table - (employee-dept table)
+-----------------------------------------------------------------------------------------------
+CREATE TABLE Employees (
+    emp_id INT,
+    name VARCHAR(50),
+    dept_id INT
+);
+
+INSERT INTO Employees VALUES
+(1,'Ravi',10),
+(2,'Anu',20),
+(3,'Kiran',30),
+(4,'Meena',40),
+(5,'John',20),
+(6,'Priya',10);
+
+CREATE TABLE Departments (
+    dept_id INT,
+    dept_name VARCHAR(50),
+    location VARCHAR(50)
+);
+
+INSERT INTO Departments VALUES
+(10,'HR','Bangalore'),
+(20,'Finance','Mumbai'),
+(30,'Sales','Bangalore'),
+(40,'IT','Delhi');
+
+
+3.Retrieve the names of employees who work in departments located in the same location
+ as department ID 10.
+
+Find the location of department 10
+Find all departments in that same location
+Get employees working in those departments
+
+
+SELECT name
+FROM Employees
+WHERE dept_id IN (
+    SELECT dept_id
+    FROM Departments
+    WHERE location = (
+        SELECT location
+        FROM Departments
+        WHERE dept_id = 10
+    )
+);
+
+----explanation--
+
+SELECT location
+FROM Departments
+WHERE dept_id = 10;
+
+o/p- Bangalore
+
+
+SELECT dept_id
+FROM Departments
+WHERE location = (
+    SELECT location
+    FROM Departments
+    WHERE dept_id = 10
+);
+
+
+-------------------------------------------------------------------------------------
+3.Table Subquery (FROM)
+-------------------------------------------------------------------------------------
+
+A subquery used in the FROM clause that returns a table (derived table).
+The inner query acts like a temporary table.
+
+You use a subquery in FROM (table subquery) when you need to treat a calculated result 
+as a table and then query it again.
+You cannot directly use aggregate results (AVG, SUM, etc.) in WHERE
+
+So we:
+
+First calculate (inner query)
+Then filter/use it (outer query)
+
+ex:
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    department VARCHAR(30),
+    salary INT
+);
+
+INSERT INTO Employees VALUES
+(1, 'Ravi',  'HR',      50000),
+(2, 'Anu',   'HR',      70000),
+(3, 'Kiran', 'IT',      80000),
+(4, 'Meena', 'IT',      90000),
+(5, 'John',  'Finance', 55000),
+(6, 'Priya', 'Finance', 65000),
+(7, 'Arjun', 'Sales',   45000),
+(8, 'Divya', 'Sales',   55000);
+
+Find departments where average salary is greater than 60000
+
+SELECT department, AVG(salary)
+FROM Employees
+WHERE AVG(salary) > 60000   -- ❌ ERROR
+GROUP BY department;
+
+SELECT department, AVG(salary)
+FROM Employees
+GROUP BY department;
+
+select department, avg(salary)
+from employees
+group by department
+having avg(salary)> 60000;
+
+
+FROM → WHERE → GROUP BY → SELECT
+
+WHERE runs before AVG() is calculated
+So AVG(salary) is not available yet
+
+When you want to reuse calculated results, First calculate once, then reuse
+-------------------------------------------------------------------------------------
+
+1.Show average salary per department
+
+sometimes we need to use the result of aggregation again.
+
+ 
+NOTE : why we need dept_avg , This result does NOT physically exist in database.
+
+It exists only temporarily in memory.
+
+Every table in the FROM clause must have a name.
+
+--------------------------------------------------
+1.Find departments where average salary is greater than 60000
+
+SELECT *
+FROM (
+    SELECT department, AVG(salary) AS avg_salary
+    FROM Employees
+    GROUP BY department
+) AS dept_avg
+WHERE avg_salary > 60000;
+
+--------------------------------------------------------------------------------------
+Operators Used with Subqueries
+---------------------------------------------------------------------------------------
+
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    marks INT,
+    department VARCHAR(20)
+);
+
+INSERT INTO Students VALUES
+(1, 'Amit',   85, 'CS'),
+(2, 'Sneha',  92, 'IT'),
+(3, 'Ravi',   70, 'CS'),
+(4, 'Priya',  88, 'ECE'),
+(5, 'Kiran',  60, 'IT'),
+(6, 'Neha',   95, 'CS'),
+(7, 'Arjun',  75, 'ECE'),
+(8, 'Divya',  82, 'MECH'),
+(9, 'Rahul',  78, 'MECH'),
+(10,'Pooja',  91, 'IT');
+
+🔸 IN
+
+1.Write an SQL query to display the names of students who belong to departments 
+where at least one student has scored less than 70 marks.
+
+select name, department from students
+WHERE department IN (SELECT department FROM Students WHERE marks < 70);
+
+2.select name,department from students
+WHERE department IN (SELECT department FROM Students WHERE marks < 70 and department='IT');
+
+3.select name,department from students
+WHERE department IN (SELECT department FROM Students WHERE marks < 40 and department='IT');
+
+-----------------------------------------------------------------------------------------
+🔸 EXISTS
+
+Correlated = inner query is Connected to the outer query.
+Non-Correlated = inner query is Independent of the outer query.
+
+EXISTS checks whether the subquery returns any rows or not
+
+If subquery returns at least 1 row → TRUE
+If subquery returns no rows → FALSE
+
+EXISTS *does NOT care what you select (1, 0, columns, etc.)
+
+NOTE:SELECT 1 is commonly used because EXISTS only checks whether rows exist—it does not care
+ what values are selected.
+
+non-corelated subquery.
+
+Ex:Checks if subquery returns any row
+
+"Does the Students table contain at least one student with marks > 70?"
+
+SELECT name,marks
+FROM Students 
+WHERE EXISTS (
+    SELECT 1 FROM Students
+    WHERE marks > 70
+);
+
+SELECT name,marks
+FROM Students 
+WHERE EXISTS (
+    SELECT name FROM Students
+    WHERE marks < 40
+);
+---- normal query---
+SELECT name, marks
+FROM Students
+WHERE marks > 70;
+
+NOte:This subquery is not related to the outer query. It simply asks:
+
+
+------------------------------------------------------------------------
+
+2.Finds customers who have placed at least one order.
+
+EXISTS: Check if related records exist
+
+Used to find records in one table that have matching records in another table.
+
+When the subquery is correlated, meaning it refers to the current row of the outer query.
+
+Correlated EXISTS (uses the outer table): Checked for each row, so some rows may be returned and 
+others filtered out.
+
+
+-- Create Customers Table
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(50)
+);
+
+-- Insert Data
+INSERT INTO Customers (CustomerID, CustomerName)
+VALUES
+(1, 'Ravi'),
+(2, 'Anu'),
+(3, 'Meena'),
+(4, 'Kiran');
+
+-- View Data
+SELECT * FROM Customers;
+
+
+-- Create Orders Table
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerID INT,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+
+-- Insert Data
+INSERT INTO Orders (OrderID, CustomerID)
+VALUES
+(101, 1),
+(102, 1),
+(103, 3);
+
+-- View Data
+SELECT * FROM Orders;
+---------------------------------------------------
+Explanation:
+Think of EXISTS as asking:
+
+"Does this customer have at least one order?"
+
+If the answer is Yes, show the customer.
+
+If the answer is No, don't show the customer.
+------------------
+here - Ravi placed 2 orders.
+Meena placed 1 order.
+Anu placed 0 orders.
+Kiran placed 0 orders.
+-----------------------
+SELECT CustomerID, CustomerName
+FROM Customers c
+WHERE EXISTS (
+    SELECT 1
+    FROM Orders o
+    WHERE o.CustomerID = c.CustomerID
+);
+
+SELECT CustomerID, CustomerName
+FROM Customers c
+WHERE EXISTS (
+    SELECT customername
+    FROM Orders o
+    WHERE o.CustomerID = c.CustomerID
+);
+
+
+Here the subquery depends on the current customer (c.CustomerID), so it is evaluated for each outer row
+----------------------------------------------------------------
+🔸 ANY
+
+Compare with any value
+
+Display the names and marks of students who scored more than at least one student in the CS department.
+
+SELECT name,marks
+FROM Students
+WHERE marks > ANY (
+    SELECT marks FROM Students WHERE department = 'CS'
+);
+
+
+
+--------------------------------------------------------------------------------
+🔸 ALL
+
+👉 Compare with all values
+
+Find the names and marks of students whose marks are less than every student in the CS department.
+
+SELECT name,marks
+FROM Students
+WHERE marks < ALL (
+    SELECT marks FROM Students WHERE department = 'CS'
+);
+
+Find the names and marks of students whose marks are greater than every student in the CS department.
+
+SELECT name,marks
+FROM Students
+WHERE marks > ALL (
+    SELECT marks FROM Students WHERE department = 'CS'
+);
+--------------------------------------------------------------------------------------
+
+NOTE:
+> ANY → Greater than at least one → Greater than MIN
+< ANY → Less than at least one → Less than MAX
+> ALL → Greater than every value → Greater than MAX
+< ALL → Less than every value → Less than MIN

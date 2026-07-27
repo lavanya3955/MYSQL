@@ -1,0 +1,145 @@
+
+--------------------------------------------------------------------------------------
+Aggregations
+--------------------------------------------------------------------------------------
+
+Aggregate functions are used to perform calculations on multiple rows and return a single result.
+
+They are commonly used with GROUP BY.
+
+
+COUNT() → Counts only non-NULL values in that column, Ignores NULLs
+COUNT(*)  → counts all rows including nulls
+SUM() → adds values
+AVG() → finds average
+MIN() → finds smallest value
+MAX() → finds largest value
+
+--------------------------------------------------------------------------------------
+
+Step 1: Create Table
+
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    department VARCHAR(50),
+    salary DECIMAL(10,2),
+    bonus DECIMAL(10,2)
+);
+
+Step 2: Insert Data
+
+INSERT INTO Employees VALUES 
+(1, 'Ravi', 'HR', 30000, 5000),
+(2, 'Anu', 'IT', 40000, NULL),
+(3, 'Kiran', 'IT', 45000, 7000),
+(4, 'Meena', 'HR', 35000, NULL),
+(5, 'Raj', 'Sales', 25000, 3000);
+
+View Table
+
+SELECT * FROM Employees;
+✅ Output
++--------+-------+------------+--------+-------+
+| emp_id | name  | department | salary | bonus |
++--------+-------+------------+--------+-------+
+| 1      | Ravi  | HR         | 30000  | 5000  |
+| 2      | Anu   | IT         | 40000  | NULL  |
+| 3      | Kiran | IT         | 45000  | 7000  |
+| 4      | Meena | HR         | 35000  | NULL  |
+| 5      | Raj   | Sales      | 25000  | 3000  |
++--------+-------+------------+--------+-------+
+
+--------------------------------------------------------------------------------------
+ 1. COUNT()
+--------------------------------------------------------------------------------------
+
+Q1: Count non-NULL bonus values
+SELECT COUNT(bonus) FROM Employees;
+
+✅ Output
+3
+
+ Only counts: 5000, 7000, 3000 (ignores NULL)
+--------------------------------------------------------------------------------------
+
+Q2: Count all rows
+
+SELECT COUNT(*) FROM Employees;
+
+Output
+5
+
+--------------------------------------------------------------------------------------
+2. SUM()
+--------------------------------------------------------------------------------------
+Q1: Total salary
+
+SELECT SUM(salary) FROM Employees;
+
+Output
+175000
+
+--------------------------------------------------------------------------------------
+Q2: Total bonus
+
+SELECT SUM(bonus) FROM Employees;
+
+Output
+15000
+
+NULL values ignored
+--------------------------------------------------------------------------------------
+
+3. AVG()
+--------------------------------------------------------------------------------------
+
+Q1: Average salary
+
+SELECT AVG(salary) FROM Employees;
+
+Output
+35000
+--------------------------------------------------------------------------------------
+Q2: Average bonus
+
+SELECT AVG(bonus) FROM Employees;
+
+Output
+5000
+
+(5000 + 7000 + 3000) / 3
+
+--------------------------------------------------------------------------------------
+4. MIN()
+--------------------------------------------------------------------------------------
+Q1: Minimum salary
+
+SELECT MIN(salary) FROM Employees;
+
+Output
+25000
+--------------------------------------------------------------------------------------
+Q2: Minimum bonus
+
+SELECT MIN(bonus) FROM Employees;
+
+Output
+3000
+
+--------------------------------------------------------------------------------------
+5. MAX()
+--------------------------------------------------------------------------------------
+Q1: Maximum salary
+
+SELECT MAX(salary) FROM Employees;
+
+Output
+45000
+--------------------------------------------------------------------------------------
+Q2: Maximum bonus
+
+SELECT MAX(bonus) FROM Employees;
+
+Output
+7000

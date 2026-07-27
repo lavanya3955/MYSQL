@@ -1,0 +1,560 @@
+DATA MODELLING & ER DIAGRAMS
+------------------------------------------------------------------------------------
+WHAT IS DATA MODELLING?
+
+Data Modelling is the process of designing how data will be stored
+and organized inside a database BEFORE creating tables using SQL.
+
+Simple Meaning:
+Plan the database structure first, then implement it.
+
+Real Life Example:
+Before building a house, an architect creates a blueprint.
+Similarly, before creating tables, we design the database.
+
+------------------------------------------------------------------------------------
+WHY DO WE NEED DATA MODELLING?
+
+Without Data Modelling:
+
+* Data duplication occurs
+* Difficult to maintain database
+* Wrong relationships between tables
+* Slow query performance
+* Data inconsistency problems
+
+With Data Modelling:
+
+* Organized database structure
+* Reduced data redundancy
+* Easy querying
+* Better performance
+* Scalable database system
+
+------------------------------------------------------------------------------------
+WHAT IS AN ER DIAGRAM?
+------------------------------------------------------------------------------------
+
+ER Diagram stands for Entity Relationship Diagram.
+
+It is a visual representation of:
+
+* Tables (Entities)
+* Columns (Attributes)
+* Primary Keys
+* Foreign Keys
+* Relationships between tables
+
+ER Diagram = Blueprint of Database Design.
+
+------------------------------------------------------------------------------------
+MAIN COMPONENTS OF ER DIAGRAM
+------------------------------------------------------------------------------------
+
+1. ENTITY (TABLE)
+------------------------------------------------------------------------------------
+
+Entity represents a real-world object stored as a table.
+
+Examples:
+Customer
+Employee
+Product
+Order
+
+------------------------------------------------------------------------------------
+
+2. ATTRIBUTES (COLUMNS)
+
+------------------------------------------------------------------------------------
+
+Attributes describe properties of an entity.
+
+Example:
+Customer Table
+--------------
+
+customer_id
+customer_name
+city
+phone
+
+------------------------------------------------------------------------------------
+
+3. PRIMARY KEY (PK)
+
+------------------------------------------------------------------------------------
+
+Primary Key uniquely identifies each row in a table.
+
+Characteristics:
+
+* Unique value
+* Cannot be NULL
+* Only one primary key per table
+
+Example:
+customer_id
+
+------------------------------------------------------------------------------------
+
+4. FOREIGN KEY (FK)
+
+------------------------------------------------------------------------------------
+
+Foreign Key connects one table to another table.
+
+Example:
+orders.customer_id references customers.customer_id
+
+Purpose:
+Maintains relationship and data integrity.
+
+------------------------------------------------------------------------------------
+
+5. RELATIONSHIPS
+
+------------------------------------------------------------------------------------
+
+A. ONE TO ONE (1:1)
+One record relates to one record.
+
+Example:
+Person → Passport
+
+
+B. ONE TO MANY (1:M)  (Most Common)
+One record relates to many records.
+
+Example:
+One Customer → Many Orders
+
+Customer ----< Orders
+
+
+C. MANY TO MANY (M:M)
+Many records relate to many records.
+
+Example:
+Students take many Courses
+Courses have many Students
+------------------------------------------------------------------------------------
+TYPES OF DATA MODELS
+------------------------------------------------------------------------------------
+
+When we build a database in real companies, we DO NOT directly start
+writing SQL tables.
+
+Conceptual Model → Idea of the house
+Logical Model → House blueprint
+Physical Model → Actual construction
+
+| Model      | Think          |
+| ---------- | -------------- |
+| Conceptual | Idea           |
+| Logical    | Design         |
+| Physical   | Implementation |
+
+
+
+overall database design happens in 3 stages:
+
+1. CONCEPTUAL DATA MODEL
+   High level business understanding.
+   No technical details.
+   What happens in business
+
+Example:
+College Management System
+
+Concept:
+
+Student enrolls in Course
+Teacher teaches Course
+Student receives Grade
+
+------------------------------------------------------------------------------------
+
+2. LOGICAL DATA MODEL
+ 
+* Entities
+* Attributes
+* Relationships
+
+Datatype not defined yet.
+
+Example: Student Course Enrollment System
+
+Scenario
+Student enrolls in Course
+Teacher teaches Course
+
+Entities and Attributes
+
+Student
+--------
+Student_ID (PK)
+Student_Name
+Email
+Phone
+
+Course
+-------
+Course_ID (PK)
+Course_Name
+Credits
+
+Teacher
+--------
+Teacher_ID (PK)
+Teacher_Name
+Department
+
+Enrollment
+-----------
+Enrollment_ID (PK)
+Student_ID (FK)
+Course_ID (FK)
+Enroll_Date
+
+Student   → enrolls → Course
+Teacher   → teaches → Course
+
+Student (Student_ID, Student_Name, Email)
+
+        |
+        | enrolls
+        ↓
+
+Enrollment (Enrollment_ID, Student_ID, Course_ID)
+
+        ↑
+        |
+Course (Course_ID, Course_Name)
+
+Teacher → teaches → Course
+
+
+------------------------------------------------------------------------------------
+
+3. PHYSICAL DATA MODEL
+   Actual implementation using SQL tables.
+
+Example:
+
+CREATE TABLE Student(
+ student_id INT AUTO_INCREMENT PRIMARY KEY,
+ student_name VARCHAR(50) NOT NULL,
+ email VARCHAR(100) UNIQUE,
+ phone VARCHAR(15)
+);
+
+CREATE TABLE Course(
+ course_id INT AUTO_INCREMENT PRIMARY KEY,
+ course_name VARCHAR(50),
+ credits INT
+);
+
+CREATE TABLE Teacher(
+ teacher_id INT AUTO_INCREMENT PRIMARY KEY,
+ teacher_name VARCHAR(50),
+ department VARCHAR(50)
+);
+
+CREATE TABLE Enrollment(
+ enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
+ student_id INT,
+ course_id INT,
+ enroll_date DATE,
+ FOREIGN KEY(student_id) REFERENCES Student(student_id),
+ FOREIGN KEY(course_id) REFERENCES Course(course_id)
+);
+------------------------------------------------------------------------------------
+
+DATA MODELLING STEPS (INDUSTRY PROCESS)
+
+1. Understand business requirements
+2. Identify entities (tables)
+3. Identify attributes (columns)
+4. Define primary keys
+5. Define relationships
+6. Apply normalization
+7. Draw ER diagram
+8. Create SQL tables
+
+------------------------------------------------------------------------------------
+
+TOOLS USED IN INDUSTRY
+
+* MySQL Workbench
+* Draw.io
+* Lucidchart
+* ERDPlus
+* Microsoft Visio
+------------------------------------------------------------------------------------
+
+Erdplus.com - create a/c - create ER Diagrams
+
+
+## SCENARIO
+
+Library Book Management System
+
+A library wants to maintain information about:
+
+* Members
+* Books
+* Which member borrowed which book
+
+In this case, ONE member borrows MANY books,
+but ONE book is issued to ONLY ONE member at a time.
+
+So this becomes a **ONE-TO-MANY relationship**.
+
+
+STEPS TO CREATE IN ERDPLUS
+
+1. Open ERDPlus website
+2. Select "ER Diagram"
+3. Click Add Entity → create MEMBER
+4. Add attributes
+5. Mark member_id as Key attribute
+6. Create BOOK entity
+7. Add attributes
+8. Create relationship
+9. Connect MEMBER to BOOK
+10. Set Cardinality → One-to-Many
+11. Save diagram
+
+---
+
+## IDENTIFY ENTITIES (TABLES)
+
+## ENTITY 1 : MEMBER
+
+Stores library member details.
+
+Attributes:
+member_id (Primary Key)
+member_name
+phone_number
+membership_date
+
+---
+
+## ENTITY 2 : BOOK
+
+Stores book information.
+
+Attributes:
+book_id (Primary Key)
+book_title
+author_name
+publish_year
+member_id (Foreign Key)
+
+## Explanation:
+
+member_id is stored inside BOOK table
+because one member can borrow many books.
+
+---
+
+UNDERSTAND RELATIONSHIP
+
+Relationship:
+Member → Book
+
+ONE member can borrow MANY books.
+(One-to-Many)
+
+Each book belongs to ONE member at a time.
+
+Overall Structure:
+
+MEMBER ----< BOOK
+
+Meaning:
+A member may have multiple borrowed books,
+but each book is linked to only one member.
+
+---
+
+## WHAT to DRAW IN ERDPLUS
+
+Create two entities:
+
+1. MEMBER
+
+---
+
+member_id (PK)
+member_name
+phone_number
+membership_date
+
+2. BOOK
+
+---
+
+book_id (PK)
+book_title
+author_name
+publish_year
+member_id (FK)
+
+Draw relationship:
+MEMBER → BOOK (1:M)
+
+
+--------------------------------------------------------------------------------------
+
+============================================================
+MYSQL WORKBENCH
+DATABASE MODEL DESIGN - COMPLETE STEPS
+============================================================
+
+SCENARIO:
+Design College Management Database Model
+using MySQL Workbench.
+
+
+MYSQL WORKBENCH – REVERSE ENGINEER 
+
+Reverse Engineering converts an existing database
+into an ER Diagram automatically.
+
+Database → ER Diagram
+
+1. Open MySQL Workbench.
+2. Connect to MySQL Server.
+3. Click Database menu.
+4. Select Reverse Engineer.
+5. Choose Local MySQL Instance connection.
+6. Click Next.
+7. Select required database (college_db).
+8. Click Next.
+9. Keep Tables, Views, Triggers selected.
+10. Click Execute.
+11. Click Next → Finish.
+12. Open EER Diagram 1.
+13. ER Diagram is created automatically.
+14. Arrange tables using Autolayout.
+15. Save model (.mwb file).
+
+
+
+/* ==========================================================
+   COLLEGE MANAGEMENT DATABASE
+   COMPLETE SQL SCRIPT
+   ========================================================== */
+
+/* STEP 1 : CREATE DATABASE */
+DROP DATABASE IF EXISTS college_db;
+
+CREATE DATABASE college_db;
+
+USE college_db;
+
+
+/* ==========================================================
+   STEP 2 : STUDENT TABLE
+   ========================================================== */
+
+CREATE TABLE Student (
+    student_id INT AUTO_INCREMENT,
+    student_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100),
+    phone VARCHAR(15),
+
+    PRIMARY KEY (student_id)
+);
+
+
+/* ==========================================================
+   STEP 3 : COURSE TABLE
+   ========================================================== */
+
+CREATE TABLE Course (
+    course_id INT AUTO_INCREMENT,
+    course_name VARCHAR(50),
+    credits INT,
+
+    PRIMARY KEY (course_id)
+);
+
+
+/* ==========================================================
+   STEP 4 : TEACHER TABLE
+   ========================================================== */
+
+CREATE TABLE Teacher (
+    teacher_id INT AUTO_INCREMENT,
+    teacher_name VARCHAR(50),
+    department VARCHAR(50),
+
+    PRIMARY KEY (teacher_id)
+);
+
+
+/* ==========================================================
+   STEP 5 : ENROLLMENT TABLE
+   ========================================================== */
+
+CREATE TABLE Enrollment (
+    enrollment_id INT AUTO_INCREMENT,
+    student_id INT,
+    course_id INT,
+    enroll_date DATE,
+
+    PRIMARY KEY (enrollment_id),
+
+    /* FOREIGN KEY RELATIONSHIPS */
+    CONSTRAINT fk_student
+        FOREIGN KEY (student_id)
+        REFERENCES Student(student_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_course
+        FOREIGN KEY (course_id)
+        REFERENCES Course(course_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+
+/* ==========================================================
+   STEP 6 : SAMPLE DATA (OPTIONAL)
+   ========================================================== */
+
+INSERT INTO Student (student_name,email,phone) VALUES
+('Ravi','ravi@gmail.com','9876543210'),
+('Anu','anu@gmail.com','9123456780'),
+('Kiran','kiran@gmail.com','9012345678');
+
+INSERT INTO Course (course_name,credits) VALUES
+('Database Systems',4),
+('Python Programming',3),
+('Data Analytics',4);
+
+INSERT INTO Teacher (teacher_name,department) VALUES
+('Meena','Computer Science'),
+('Arun','Information Technology');
+
+INSERT INTO Enrollment (student_id,course_id,enroll_date) VALUES
+(1,1,'2026-01-10'),
+(2,2,'2026-02-15'),
+(3,3,'2026-03-01');
+
+
+/* ==========================================================
+   STEP 7 : VERIFY
+   ========================================================== */
+
+SHOW TABLES;
+
+SELECT * FROM Student;
+SELECT * FROM Course;
+SELECT * FROM Teacher;
+SELECT * FROM Enrollment;

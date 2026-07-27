@@ -1,0 +1,660 @@
+==========================================================
+CURSORS IN MYSQL
+==========================================================
+
+1. WHAT IS A CURSOR?
+----------------------------------------------------------
+
+A Cursor is a database object used to retrieve and process
+rows from a result set one by one.
+
+Simple Definition:
+A cursor allows row-by-row processing of query results.
+
+A Cursor is a database object used to process query results row by row instead of 
+working on the whole set at once.
+
+----------------------------------------------------------
+
+2. WHY CURSOR?
+----------------------------------------------------------
+
+Normally SQL works in SET-based manner (all rows at once).
+
+But Cursor is used when:
+- We need row-by-row processing
+- We need custom logic for each row
+- We cannot use simple SELECT or UPDATE
+
+----------------------------------------------------------
+
+3. REAL LIFE EXAMPLE
+----------------------------------------------------------
+
+Scenario:
+A company wants to give 10% bonus to each employee individually.
+
+Instead of updating all at once,
+we process each employee one by one using cursor.
+
+----------------------------------------------------------
+
+4. TYPES OF CURSORS
+----------------------------------------------------------
+
+1. Implicit Cursor
+- Automatically created by MySQL
+- Used in INSERT, UPDATE, DELETE, SELECT (single row result)
+
+How It Works
+
+When a SQL statement runs:
+
+MySQL executes the query.
+MySQL internally opens a cursor.
+Processes affected rows.
+Automatically closes the cursor.
+
+No manual coding required.
+
+
+2. Explicit Cursor
+- Defined by user inside procedure
+- Used for row-by-row processing
+
+An Explicit Cursor is a cursor created and controlled manually by the programmer to process data row-by-row.
+----------------------------------------------------------
+
+5. CURSOR LIFECYCLE
+----------------------------------------------------------
+
+1. DECLARE Cursor
+2. OPEN Cursor
+3. FETCH rows one by one
+4. CLOSE Cursor
+
+----------------------------------------------------------
+6. CURSOR SYNTAX
+----------------------------------------------------------
+
+DECLARE cursor_name CURSOR FOR
+SELECT statement;
+
+OPEN cursor_name;
+
+FETCH cursor_name INTO variables;
+
+CLOSE cursor_name;
+
+---
+
+1. DECLARE Cursor → Defines query
+2. FETCH → Gets row data
+
+
+----------------------------------------------------------
+
+9. ADVANTAGES
+----------------------------------------------------------
+
+- Row-by-row processing
+- Useful for complex logic
+- Works inside procedures
+- Better control over data operations
+
+----------------------------------------------------------
+
+10. DISADVANTAGES
+----------------------------------------------------------
+
+- Slower than normal SQL queries
+- Uses more memory
+- Not suitable for large datasets
+- Complex to write and debug
+
+----------------------------------------------------------
+
+11. WHEN TO USE CURSOR?
+----------------------------------------------------------
+
+- Complex row-by-row processing
+- Custom calculations per row
+- Business logic per record
+
+----------------------------------------------------------
+CREATE TABLE employees (
+    emp_id INT,
+    name VARCHAR(50),
+    salary INT
+);
+
+INSERT INTO employees VALUES
+(1,'Ravi',30000),
+(2,'Priya',45000),
+(3,'Arun',50000),
+(4,'Meena',35000);
+
+note: Internally, BOOLEAN is just an alias for TINYINT(1).
+DECLARE done BOOLEAN DEFAULT FALSE;
+DECLARE done INT DEFAULT 0;
+
+DELIMITER $$
+
+CREATE PROCEDURE FetchEmployees()
+BEGIN
+ -- Loop control flag
+    DECLARE done INT DEFAULT FALSE; -- (DECLARE done INT DEFAULT 0), done = FALSE → rows still exist, done = TRUE  → no more rows (Used to stop loop)
+
+   -- Variables to Store Row Data (Temporary variables) , Each FETCH stores one row here.
+    DECLARE v_id INT;
+    DECLARE v_name VARCHAR(50);
+    DECLARE v_salary INT;
+
+    -- Cursor Declaration
+    DECLARE emp_cursor CURSOR FOR
+        SELECT emp_id, name, salary FROM employees;
+
+    -- Handler when no rows left
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Open cursor
+    OPEN emp_cursor;
+
+    read_loop: LOOP
+
+        -- Fetch ONE ROW at a time
+        FETCH emp_cursor INTO v_id, v_name, v_salary;
+
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Display fetched row
+        SELECT v_id AS ID,
+               v_name AS Name,
+               v_salary AS Salary;
+
+    END LOOP;
+
+    CLOSE emp_cursor;
+
+END $$
+
+DELIMITER ;
+
+CALL FetchEmployees();
+
+
+Easy to remember : 
+D → Declare variables
+C → Cursor declare
+H → Handler declare
+O → Open cursor
+F → Fetch rows
+L → Loop processing
+C → Close cursor
+
+
+----------------------------------------------------------
+Cursor Example (Fetch 1,3,5 Rows)
+
+DELIMITER $$
+
+CREATE PROCEDURE FetchSpecificRows()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE counter INT DEFAULT 0;
+
+    DECLARE v_id INT;
+    DECLARE v_name VARCHAR(50);
+    DECLARE v_salary INT;
+
+    DECLARE emp_cursor CURSOR FOR
+        SELECT emp_id,name,salary FROM employees;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN emp_cursor;
+
+    read_loop: LOOP
+
+        FETCH emp_cursor INTO v_id,v_name,v_salary;
+
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        SET counter = counter + 1;
+
+        -- Fetch only rows 1,3,5
+        IF counter IN (1,3,5) THEN
+            SELECT v_id,v_name,v_salary;
+        END IF;
+
+    END LOOP;
+
+    CLOSE emp_cursor;
+
+END $$
+
+DELIMITER ;
+
+CALL FetchSpecificRows();
+----------------------------------------------------------
+Example 2 QUESTION
+
+
+CREATE TABLE employees(
+emp_id INT PRIMARY KEY,
+emp_name VARCHAR(50),
+salary INT,
+joining_date DATE
+);
+
+INSERT INTO employees VALUES
+(101,'Ravi',40000,'2015-01-10'),
+(102,'Anu',50000,'2012-03-15'),
+(103,'Kiran',45000,'2018-07-20'),
+(104,'Meena',60000,'2010-05-01'),
+(105,'Arjun',55000,'2016-09-12');
+
+SELECT * FROM employees;
+
+CREATE VIEW emp_view AS
+SELECT emp_id, salary
+FROM employees;
+
+SELECT * FROM emp_view;
+
+
+Create a Stored Procedure that:
+
+1. Reads employees one by one from emp_view
+2. Increases salary by given percentage
+3. Updates employee salary
+4. Stores audit log for every employee:
+
+   * Employee ID
+   * Old Salary
+   * New Salary
+   * Who changed salary
+   * Timestamp
+5. Process must happen ROW BY ROW using CURSOR
+
+## REAL TIME SCENARIO
+
+Company HR wants to give salary hike to all employees.
+But company must maintain salary change history.
+
+So we use:
+CURSOR + LOOP + HANDLER
+
+## GENERAL FLOW
+
+SELECT DATA
+|
+OPEN CURSOR
+|
+FETCH ROW
+|
+PROCESS ROW
+|
+UPDATE + LOG
+|
+FETCH NEXT ROW
+|
+NO MORE ROWS -> EXIT LOOP
+|
+CLOSE CURSOR
+
+## STEP 1 : CREATE AUDIT TABLE
+
+CREATE TABLE salary_audit(
+audit_id INT AUTO_INCREMENT PRIMARY KEY,
+emp_id INT,
+old_salary INT,
+new_salary INT,
+changed_by VARCHAR(50),
+changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+## STEP 2 : STORED PROCEDURE
+
+DELIMITER $$
+
+CREATE PROCEDURE bulk_raise_with_audit(IN percent_raise DECIMAL(5,2))
+BEGIN
+
+-- Variable Declaration
+DECLARE done INT DEFAULT FALSE;
+DECLARE empID INT;
+DECLARE oldSalary INT;
+DECLARE newSalary INT;
+
+-- Cursor Declaration
+DECLARE emp_cursor CURSOR FOR
+    SELECT emp_id, salary FROM emp_view;
+
+-- Handler (No more rows)
+DECLARE CONTINUE HANDLER FOR NOT FOUND
+    SET done = TRUE;
+
+-- Open Cursor
+OPEN emp_cursor;
+
+read_loop: LOOP
+
+    -- Fetch one row
+    FETCH emp_cursor INTO empID, oldSalary;
+
+    -- Exit condition
+    IF done THEN
+        LEAVE read_loop;
+    END IF;
+
+    -- Calculate New Salary
+    SET newSalary = oldSalary + (oldSalary * percent_raise / 100);
+
+
+	SELECT empID AS Employee_ID,
+           oldSalary AS Old_Salary,
+           newSalary AS New_Salary;
+
+     -- Update Salary
+    UPDATE emp_view
+    SET salary = newSalary
+    WHERE emp_id = empID;
+
+    -- Insert Audit Record
+    INSERT INTO salary_audit
+    (emp_id, old_salary, new_salary, changed_by)
+    VALUES
+    (empID, oldSalary, newSalary, USER());
+
+END LOOP;
+
+-- Close Cursor
+CLOSE emp_cursor;
+
+
+END $$
+
+DELIMITER ;
+
+## STEP 3 : EXECUTE PROCEDURE
+
+CALL bulk_raise_with_audit(5.2);
+
+## STEP 4 : VERIFY OUTPUT
+
+SELECT * FROM emp_view;
+
+SELECT * FROM salary_audit;
+
+
+----------------------------------------------------------
+
+## CONCEPT EXPLANATION
+
+DECLARE VARIABLES
+Used to temporarily store values.
+
+CURSOR
+Cursor reads table data row by row.
+
+HANDLER
+Automatically triggers when cursor reaches end of data.
+
+LOOP
+Runs continuously until LEAVE statement executes.
+
+FETCH
+Moves cursor to next row.
+
+LEAVE
+Exits loop safely.
+
+CLOSE CURSOR
+Releases memory resources.
+
+## VISUAL FLOW 
+
+OPEN CURSOR
+|
+FETCH ROW
+|
+DONE ?
+|        |
+YES        NO
+EXIT     PROCESS ROW
+|
+UPDATE + AUDIT LOG
+|
+FETCH AGAIN
+
+
+
+Normal UPDATE:
+UPDATE emp_view SET salary = salary * 1.05;
+
+Problem:
+Cannot log each employee change.
+
+Cursor Solution:
+✔ Row-by-row processing
+✔ Audit logging
+✔ Conditional updates
+✔ Business rule handling
+
+
+
+----------------------------------------------------------
+
+Example 3
+
+# CURSOR EXAMPLE 3 : COMPLIANCE VALIDATION BEFORE PAYROLL
+
+## SCENARIO
+
+Before processing payroll, company must validate employees.
+
+Checks required:
+
+1. Salary must be greater than 0
+2. Employee department must exist
+3. Salary should not be unusually high
+
+If any rule fails → log issue in payroll_issues table.
+
+============================================================
+STEP 1 : CREATE DATABASE
+========================
+
+CREATE DATABASE payroll_db;
+
+USE payroll_db;
+
+============================================================
+STEP 2 : CREATE DEPARTMENT TABLE
+================================
+
+CREATE TABLE departments(
+dept_id INT PRIMARY KEY,
+dept_name VARCHAR(50)
+);
+
+INSERT INTO departments VALUES
+(10,'HR'),
+(20,'IT'),
+(30,'Finance');
+
+============================================================
+STEP 3 : CREATE EMPLOYEE TABLE
+==============================
+
+CREATE TABLE employees(
+emp_id INT PRIMARY KEY,
+emp_name VARCHAR(50),
+salary INT,
+dept_id INT
+);
+
+============================================================
+STEP 4 : INSERT SAMPLE DATA
+===========================
+
+INSERT INTO employees VALUES
+(1,'Ravi',40000,10),
+(2,'Anu',0,20),              -- Invalid salary
+(3,'Kiran',1500000,30),      -- Unusually high salary
+(4,'Meena',50000,NULL),      -- Missing department
+(5,'Arjun',55000,20);
+
+## CHECK DATA
+
+SELECT * FROM employees;
+
+============================================================
+STEP 5 : CREATE ISSUE LOG TABLE
+===============================
+
+CREATE TABLE payroll_issues(
+emp_id INT,
+issue_message VARCHAR(255),
+logged_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+============================================================
+STEP 6 : CREATE STORED PROCEDURE (CURSOR VALIDATION)
+====================================================
+
+DELIMITER $$
+
+CREATE PROCEDURE validate_payroll()
+BEGIN
+
+DECLARE done INT DEFAULT FALSE;
+DECLARE v_empID INT;
+DECLARE v_salary INT;
+DECLARE v_dept INT;
+DECLARE dept_count INT;
+
+-- Cursor
+DECLARE emp_cursor CURSOR FOR
+    SELECT emp_id, salary, dept_id FROM employees;
+
+-- Handler when rows finish
+DECLARE CONTINUE HANDLER FOR NOT FOUND
+    SET done = TRUE;
+
+OPEN emp_cursor;
+
+read_loop: LOOP
+
+    FETCH emp_cursor INTO v_empID, v_salary, v_dept;
+
+    IF done THEN
+        LEAVE read_loop;
+    END IF;
+
+SELECT
+    'Processing Employee' AS Message,
+    v_empID AS emp_id,
+    v_salary AS salary,
+    v_dept AS dept_id;
+  
+    -- VALIDATION 1 : Salary must be > 0
+ 
+    IF v_salary <= 0 THEN
+        INSERT INTO payroll_issues(emp_id,issue_message)
+        VALUES(v_empID,'Invalid Salary (<=0)');
+    END IF;
+
+    -- VALIDATION 2 : Department must exist
+
+    SELECT COUNT(*) INTO dept_count
+    FROM departments
+    WHERE dept_id = v_dept;
+
+    IF dept_count = 0 THEN
+        INSERT INTO payroll_issues(emp_id,issue_message)
+        VALUES(v_empID,'Department does not exist');
+    END IF;
+
+
+-- comment above explanation : SELECT COUNT(*) FROM departments WHERE dept_id = 10, o/p=1 exists, SELECT COUNT(*) FROM departments WHERE dept_id = 99, doesnt exist so o/p =0
+    
+    -- VALIDATION 3 : Salary unusually high
+   
+    IF v_salary > 1000000 THEN
+        INSERT INTO payroll_issues(emp_id,issue_message)
+        VALUES(v_empID,'Salary unusually high');
+    END IF;
+
+END LOOP;
+
+CLOSE emp_cursor;
+
+END $$
+
+DELIMITER ;
+
+============================================================
+STEP 7 : EXECUTE PROCEDURE
+==========================
+
+CALL validate_payroll();
+
+============================================================
+STEP 8 : VIEW VALIDATION ISSUES
+===============================
+
+SELECT * FROM payroll_issues;
+
+============================================================
+EXPECTED OUTPUT
+===============
+
+## emp_id | issue_message
+
+2      | Invalid Salary (<=0)
+3      | Salary unusually high
+4      | Department does not exist
+
+============================================================
+HOW CURSOR WORKS HERE
+=====================
+
+1. Cursor reads employee records one by one
+2. Each employee validated individually
+3. If rule fails → issue logged
+4. Process continues for next employee
+5. Stops automatically when rows end
+
+============================================================
+WHY CURSOR IS USED?
+===================
+
+Bulk validation cannot be done easily in single query.
+
+Cursor allows:
+✔ Row-by-row compliance checks
+✔ Multiple validations
+✔ Detailed logging
+✔ Payroll safety
+
+============================================================
+REAL COMPANY USE CASE
+=====================
+
+Before salary payment companies run:
+
+✔ Compliance validation
+✔ Fraud detection
+✔ Data quality checks
+✔ Payroll approval process
+
+============================================================
+
+
+

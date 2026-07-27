@@ -1,0 +1,972 @@
+-------------------------------------------------------------------------------------------------------------------------
+My Sql uses different types of languages to interact with Database. these are categorized based on their functions.
+DDL 
+DML 
+DQL
+DCL
+TCL 
+
+We will use these commands/stmts based on our requirement.
+To identify whether it is a ddl, dml, dcl we have sql keywords under each of them.
+
+
+DDL – Data Definition Language
+Used For : Creating and modifying database structures.
+Common Commands:  
+CREATE – Create new table or database
+ALTER – Modify table structure
+DROP – Delete table or database
+TRUNCATE – Remove all data from a table. permanent loss
+---------------------------------------------------------------------------------------------------
+DML - Data Manipulation Language
+Used For: Managing data inside tables.
+Common Commands:
+INSERT – Add data
+UPDATE – Modify data
+DELETE – Remove data - u can get back the original data.
+
+Note : Delete is used to remove the rows from the table, commit & rollback can be performed after delete statement.
+ Truncate is used to remove all the rows from the table. Truncate cannot be rolled back.
+------------------------------------------------------------------------------------------------------
+DQL – Data Query Language
+Used For: Retrieving data from the database.
+Common Commands:  
+SELECT – To fetch records from database
+---------------------------------------------------------------------------------------
+DCL – Data Control Language
+Used For: Managing permissions and access.
+Common Commands:  
+GRANT – Give permission 
+REVOKE – Remove permission
+----------------------------------------------------------------------------------------------------
+TCL – Transaction Control Language
+Used For: Managing transactions (groups of operations).  
+Common Commands:  COMMIT – Save changes
+ROLLBACK – Undo changes
+SAVEPOINT – (partial rollback) Sets a point in a transaction to rollback (A SAVEPOINT is a marker inside a transaction that allows you to roll back part of the transaction, not the entire transaction.)
+
+------------------------------------------------------------------------------------------------------------
+explanation for
+
+DCL --
+Used to control who can access what in the database
+
+Students DATABASE--- 
+Students → Can view marks, attendance, and details but cannot modify data.
+Teachers → Can enter marks, update attendance, and view student records.
+Admin Staff → Can add and update student information and manage admissions.
+Management/Principal → Can view reports and analyze overall performance.
+DBA (Database Admin) → Has full control over database, tables, and user permissions.
+
+Not everyone gets full access Student → limited access Teacher → moderate access ,
+Admin/DBA → full access..
+
+In real companies:
+
+Many users work on the same database but not everyone should have full access.
+Access is given based on roles to maintain security.
+DBA → Full control (like office owner).
+Developer → Works on building and updating data.
+Support team → Checks issues, limited access.
+User → Only views data.
+Not everyone gets full access to avoid misuse.
+
+---------------------------------------------------------------------------------------------------
+
+TCL--------
+
+A transaction = multiple steps done together as one unit
+
+A transaction is a set of one or more SQL statements that are executed as a single unit of work.
+It means - If one fails, the entire transaction is rolled back to keep the data correct.”
+
+Transaction example....
+Think of filling an online form:
+
+You enter details step by step
+If you cancel → everything is lost (ROLLBACK)
+If you submit → saved permanently (COMMIT)
+Save draft → like SAVEPOINT
+
+Example: Bank transfer has two steps (debit and credit).
+Both steps must happen together for correctness.
+If one fails, it causes data inconsistency.
+
+In context of db transactions - “ACID properties make transactions in MySQL reliable.
+Atomicity means all or nothing,
+Consistency keeps data valid, 
+Isolation keeps transactions independent, and 
+Durability ensures committed data is saved permanently.”
+
+Explanation:
+
+Atomicity: If one of the two queries fails, both updates will be rolled back.
+Consistency: The total amount in both accounts will remain the same. 
+Isolation: If another transaction is trying to access the same account, it will
+wait until this transaction completes.
+Durability: After COMMIT, changes will be saved permanently even in case
+of a power failure
+
+-------------------------------------------------------------------------------------------------------
+SQL Commands explanation with examples.
+
+DDL
+-------------------------------------------------------------------------------------------------------
+
+1.Create a new database named lenoMartDB.
+2.USE lenoMartDB;
+
+1.Create a table named Categories with the following columns:
+■	category_id: Integer.
+■	category_name: Variable-length string (e.g., 100 characters)
+■	description: Large text block
+
+CREATE DATABASE lenomartdb;
+
+USE lenomartdb;
+
+CREATE TABLE categories (
+    category_id INT,
+    category_name VARCHAR(100),
+    description TEXT
+);
+
+----------------------------------------------------------------------------------------------------------
+
+2.Create a table named Suppliers with the following columns:
+■	supplier_id: Integer.
+■	supplier_name: Variable-length string (e.g., 150 characters)
+■	contact_email: Variable-length string (e.g., 100 characters)
+■	phone_number: Variable-length string (e.g., 20 characters
+
+
+CREATE TABLE suppliers (
+    supplier_id INT,
+    supplier_name VARCHAR(150),
+    contact_email VARCHAR(150),
+    phone_number VARCHAR(20)
+);
+
+-----------------------------------------------------------------------------------------------------------
+3.Create a table named Products with the following
+columns:
+■	product_id: Integer.
+■	product_name: Variable-length string (e.g., 255 characters).
+■	description: Large text block
+■	price: Precise decimal number
+■	stock_quantity: Integer
+■	category_id: Integer
+■	supplier_id: Integer
+■	last_updated: Date and time
+
+
+CREATE TABLE products (
+    product_id INT,
+    product_name VARCHAR(255),
+    prod_description TEXT,
+    price DECIMAL(10,2),
+    stock_quantity INT,
+    category_id INT,
+    supplier_id INT,
+    last_updated DATETIME
+);
+
+
+--------------------------------------------------------------------------------------------------
+ALTER
+---------------------------------------------------------------------------------------------------
+Create a database named IBMHR and two tables Employees & Department:
+
+■ Employee_id: INT, 
+first_name VARCHAR(50),
+last_name	VARCHAR(50),
+email	VARCHAR(100),	
+hire_date	DATE, 
+department_id INT.
+
+■ Department_id	INT,	
+department_name VARCHAR(50).
+
+
+create database IBMHR;
+
+use IBMHR;
+
+
+create table employees
+(
+employee_id INT PRIMARY KEY AUTO_INCREMENT, 
+first_name VARCHAR(50),
+last_name VARCHAR(50),	
+email VARCHAR(100),	
+hire_date DATE, 
+department_id INT
+);
+
+
+create table employees
+(
+employee_id INT,
+first_name VARCHAR(50),
+last_name VARCHAR(50),	
+email VARCHAR(100),	
+hire_date DATE, 
+department_id INT
+);
+
+----- Alter-------------Add New Column
+1.Add a new column named salary to the Employees table with a DECIMAL(10, 2) data type
+
+alter table employees add column salary decimal(10,2);
+
+-- ----Modify Column Data Type
+
+2.Employee email addresses are getting longer. Modify the email column in the Employees table
+to VARCHAR(150).
+
+alter table employees modify column email VARCHAR(150);
+
+------ Rename Table
+3.The Employees table needs to be renamed to Staff_Records for better clarity.
+
+alter table employees rename Staff_Records;
+
+alter table Staff_Records rename to Staff_Records2;
+
+------ Rename Column
+
+4.The 'first_name' column in the Staff_Records table should be renamed to given_name.
+
+alter table employees rename column first_name to given_name;
+
+------ Add Column
+5.Add the manager_id column
+
+alter table Staff_Records add column manager_id int;
+
+---- Drop Column
+6.Drop the manager_id column
+
+alter table Staff_Records drop column manager_id;
+
+------ Verification
+desc employees;
+
+SHOW COLUMNS FROM Staff_Records;
+
+-------------------------------------------------------------------------------------------------
+DML COMMANDS
+-------------------------------------------------------------------------------------------------
+
+Create a database named CRM_Data and a table named Customers with the following columns:
+■	customer_id: INT AUTO_INCREMENT
+■	first_name: VARCHAR(50) 
+■	last_name: VARCHAR(50) 
+■	email: VARCHAR(100) 
+■	phone_number: VARCHAR(20)
+■	status: VARCHAR(20) 
+■	last_contact_date: DATE
+
+1.Insert at least 5 sample customer records with varied data
+
+create database FRM_Data ;
+
+use FRM_Data ;
+
+create table customers
+(
+customer_id INT PRIMARY KEY AUTO_INCREMENT,
+first_name VARCHAR(50),
+last_name VARCHAR(50),
+email VARCHAR(100),
+phone_number VARCHAR(20),
+status VARCHAR(20), 
+last_contact_date DATE
+);
+
+
+VARCHAR stores strings (text)
+In MySQL, text must always be inside quotes
+
+SQL treats spaces as separators
+So we use quotes to tell SQL: “This is one single column name”
+
+Dates are also treated as formatted strings
+MySQL expects date format: 'YYYY-MM-DD'
+Note:MySQL treats DATE (2025 - 04 - 05 = 2016) a mathematical expression.
+
+	
+insert into customers(first_name,last_name,email , phone_number ,status ,last_contact_date) 
+values
+('latha','reddy','lr@gmail.com','9900034549','Active','2023-01-01'),
+('jane','smith','gg@gmail.com','9900034549','Lead','2022-08-22'),
+('sita','naik','sn@gmail.com','9900034769','Inactive','2022-09-17'),
+('rama','reddy','rr@gmail.com','9900021549','Inactive','2023-04-15'),
+('krishna','gowda','kg@gmail.com','9900044549','Lead','2023-06-14');
+
+
+2.Again Insert 3 new customer records, providing values for all columns.
+
+insert into customers(first_name,last_name,email , phone_number ,status ,last_contact_date) 
+values
+('ganga','reddy','grd@gmail.com','9900021549','Active','2022-12-03'),
+('kaveri','gowda','kgi@gmail.com','9900024549','Lead','2021-08-22'),
+('mohan','naidu','mn@gmail.com','9900034569','Inactive','2020-09-15');
+
+3.Insert 2 more new customer records, providing only first_name, last_name, and email.
+
+insert into customers(first_name,last_name,email) 
+values
+('swetha','reddy','srd@gmail.com'),
+('keerthi','gowda','keg@gmail.com'),
+('swathi','naidu','swn@gmail.com');
+
+
+NOTE:If you provide values for ALL columns in correct order, you can skip column names.
+ex:INSERT INTO customers 
+VALUES ('Sita', 'Rao', 'sita.rao@gmail.com', '40008000', 'Active','2022-12-03');
+
+--4.Update Name latha to geetha in customers table
+
+UPDATE customers 
+SET first_name = 'Geetha' 
+WHERE status = 'INActive';
+
+
+-- 5.	Update	Contact	Information if both first_name & last_name matches
+
+update customers
+set phone_number ='99000000', email='ghjgjhg@example.com' 
+where first_name='jane' and last_name='smith';
+
+--6. Update the contact information of customers if either one of condition satisfies first name  OR last name.
+
+update customers 
+set phone_number ='555-123-4567', email='jane.smith.new@example.com' 
+where first_name='keerthi' or last_name='smith';
+
+-- 7.	Delete Specific Customer
+
+delete from customers where customer_id=3;
+
+DELETE FROM customers 
+WHERE customer_id = 3 OR customer_id = 5;
+
+DELETE FROM customers 
+WHERE customer_id IN (2, 4);
+
+DELETE FROM customers 
+WHERE customer_id BETWEEN 3 AND 5;
+
+-- 8.	Delete Inactive Records
+
+delete from customers where status='Inactive';
+
+-- 9.	Verification
+
+select * from customers;
+
+
+------------------------------------------------------------------------------------------
+DQL
+------------------------------------------------------------------------------------------
+
+1. Retrieve all data from the table
+
+SELECT * 
+FROM customers;
+
+2. Retrieve only first names of all customers
+
+SELECT first_name 
+FROM customers;
+
+3. Retrieve first name and last name of all customers
+
+SELECT first_name, last_name 
+FROM customers;
+
+4. Retrieve email and phone number of all customers
+
+SELECT email, phone_number 
+FROM customers;
+
+5. Retrieve customer_id and status of all customers
+
+SELECT customer_id, status 
+FROM customers;
+
+6. Retrieve Distinct unique first names from customers.
+
+SELECT DISTINCT first_name 
+FROM customers;
+
+-------------------------------------------------------------------------------------------------
+Difference b/w delete & truncate TEST & OBSERVE the changes.
+-------------------------------------------------------------------------------------------------
+
+1.CREATE TABLE Student_Attendance 
+(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    student_name VARCHAR(50),
+    status VARCHAR(10),
+    date DATE
+);
+
+2.INSERT INTO Student_Attendance (student_name, status, date) VALUES
+('Ravi', 'Present', '2026-04-01'),
+('Anu', 'Absent', '2026-04-01'),
+('Kiran', 'Present', '2026-04-01'),
+('Meena', 'Present', '2026-04-01'),
+('Rahul', 'Absent', '2026-04-01');
+
+
+
+| id | student_name | status  | date       |
+| -- | ------------ | ------- | ---------- |
+| 1  | Ravi         | Present | 2026-04-01 |
+| 2  | Anu          | Absent  | 2026-04-01 |
+| 3  | Kiran        | Present | 2026-04-01 |
+| 4  | Meena        | Present | 2026-04-01 |
+| 5  | Rahul        | Absent  | 2026-04-01 |
+
+
+
+------DELETE → clears data but numbering continues (6, 7, 8...)
+------TRUNCATE → clears data and starts again (1, 2, 3...)
+
+
+DELETE FROM Student_Attendance;
+
+
+INSERT INTO Student_Attendance (student_name, status, date)
+VALUES ('Sita', 'Present', '2026-04-02');
+
+
+TRUNCATE TABLE Student_Attendance;
+
+INSERT INTO Student_Attendance (student_name, status, date)
+VALUES ('Arjun', 'Present', '2026-04-02');
+
+
+Delete-
+You can delete one row or all rows.
+It does NOT reset auto-increment
+It is slower (removes row by row)
+
+Example: School Roll Numbers
+Last roll number given = 5
+Next roll number = 6
+
+Now imagine all students leave the class (like DELETE)
+
+The register is empty now
+But teacher remembers last roll number was 5
+
+So when a new student joins:
+He gets roll number 6 (not 1)
+
+
+Truncate-
+It removes everything at once
+It resets auto-increment
+It is faster
+
+Table becomes empty
+Next id starts from 1 again
+
+Example: New School Register
+Old register had roll numbers 1 to 5
+
+Now school decides to throw away the old register and take a brand new one (like TRUNCATE)
+
+All old records are gone
+Even the roll number tracking is reset
+
+So when a new student joins:
+He gets roll number 1 (starts fresh)
+
+--------------------------------------------------------------------------------------
+DCL - GRANT & REVOKE
+--------------------------------------------------------------------------------------
+
+User Management Commands -
+
+CREATE USER → creates a new user account
+DROP USER → deletes an existing user account from MySQL
+VIEW USER → shows existing users 
+CHANGE PASSWORD → updates the password of an existing user account
+LOCK/UNLOCK ACCOUNT → restricts or allows a user to log in to the database account
+----------------------------------------------------------------------------------------
+
+1. CREATE USER
+----------------------------------------------------------------------------------------
+ Q1: Create a new user
+
+CREATE USER 'student1'@'localhost' IDENTIFIED BY '1234';
+
+Output
+Query OK, 0 rows affected
+
+IDENTIFIED → means “verified” or “authenticated” - IDENTIFIED BY → sets password
+
+status:connection name-localhost via TCP/IP
+
+Local host = student1 can connect ONLY from this system, not from other computers
+
+'student1'@'%' → Can login from anywhere (any system)
+
+----------------------------------------------------------------------------------------
+Q2: Create another user
+
+CREATE USER 'student1'@'localhost' IDENTIFIED BY 'abcd';
+
+Output
+Query OK, 0 rows affected
+----------------------------------------------------------------------------------------
+2. VIEW USERS
+
+MySQL doesn’t have VIEW USER command directly
+We use system table
+
+----------------------------------------------------------------------------------------
+Q3: Show all users
+
+SELECT user, host FROM mysql.user;
+
+select user, host from dbname.table.name;
+
+Output (sample)
++----------+-----------+
+| user     | host      |
++----------+-----------+
+| root     | localhost |
+| student1 | localhost |
+| student2 | localhost |
++----------+-----------+
+
+----------------------------------------------------------------------------------------
+3. CHANGE PASSWORD
+
+Q4: Change password for student1
+
+ALTER USER 'student1'@'localhost' IDENTIFIED BY 'new123';
+
+Output
+Query OK, 0 rows affected
+----------------------------------------------------------------------------------------
+ Q5: Change password for student2
+
+ALTER USER 'student2'@'localhost' IDENTIFIED BY 'pass456';
+----------------------------------------------------------------------------------------
+Rename user:
+
+rename user 'kishore'@''localhost' to 'client_user'@'localhost'
+
+-------------------------------------------------------------------------------------------
+
+4. LOCK ACCOUNT
+----------------------------------------------------------------------------------------
+Q6: Lock user account
+
+ALTER USER 'student1'@'localhost' ACCOUNT LOCK;
+
+ALTER USER 'Kishore'@'localhost' ACCOUNT LOCK;
+
+Output
+Query OK, 0 rows affected
+
+What happens?
+
+If login attempted:
+
+ERROR: Account is locked
+----------------------------------------------------------------------------------------
+
+5. UNLOCK ACCOUNT
+----------------------------------------------------------------------------------------
+
+Q7: Unlock user account
+
+ALTER USER 'student1'@'localhost' ACCOUNT UNLOCK;
+
+Output
+Query OK, 0 rows affected
+----------------------------------------------------------------------------------------
+6. DROP USER
+----------------------------------------------------------------------------------------
+Q8: Delete a user
+
+DROP USER 'student2'@'localhost';
+
+Output
+Query OK, 0 rows affected
+
+----------------------------------------------------------------------------------------
+Q9: Verify user removed
+
+SELECT user, host FROM mysql.user;
+
+Output
++----------+-----------+
+| user     | host      |
++----------+-----------+
+| root     | localhost |
+| student1 | localhost |
++----------+-----------+
+
+---------------------------------------------------------------------------------------------
+
+What is DCL?
+
+DCL = Data Control Language
+Used to control permissions (access rights)
+
+
+---------------------------------------------------------------------------------------------
+Commands
+GRANT → Give permission
+REVOKE → Remove permission
+
+---------------------------------------------------------------------------------------------
+
+Step 1: Create Table
+CREATE TABLE Employees (
+    id INT,
+    name VARCHAR(50),
+    salary INT
+);
+
+INSERT INTO Employees VALUES
+(1, 'Ravi', 30000),
+(2, 'Anu', 40000);
+
+---------------------------------------------------------------------------------------------
+
+Step 2: Create User
+
+CREATE USER 'emp_user'@'localhost' IDENTIFIED BY '1234';
+
+CREATE USER 'Keertana'@'localhost' IDENTIFIED BY '1234';
+
+From root user :
+
+
+---------------------------------------------------------------------------------------------
+Step 3: GRANT (Give Permission)
+
+Q1: Give SELECT permission for one particular database.
+
+Syntax: GRANT permission ON database_name.table_name TO 'user'@'host';
+
+grant select on swiftcart.* to 'student1'@'localhost'; 
+
+grant insert on swiftcart.* to 'emp_user3'@'localhost';
+
+grant select on swiftcart.customers to 'client_user'@'localhost'
+
+grant GRANT ALL PRIVILEGES on *.* to 'emp_user3'@'localhost';
+
+swiftcart is the database here
+student1 is the username
+-----------------------------------------------------------------------------------------------
+Q1: Give SELECT permission for all database & all tables.
+
+GRANT SELECT ON *.* TO 'student1'@'localhost';
+
+------------------------------------------------------------------------------------------------
+
+Q1: Give particular permission for particular database & for particular tables.
+
+GRANT permission ON database_name.table_name TO 'user'@'host';
+
+GRANT SELECT ON swiftcart.Employees TO 'student1'@'localhost';
+
+GRANT INSERT ON swiftcart.Employees TO 'student1'@'localhost';
+
+GRANT DELETE ON swiftcart.Employees TO 'student1'@'localhost';
+
+
+--- to check wat permissions are given
+SHOW GRANTS FOR 'student1'@'localhost';
+---------------------------------------------------------------------------------------------
+Step 4: GRANT Multiple Permissions
+
+GRANT SELECT, INSERT, UPDATE ON *.* TO 'student1'@'localhost';
+
+Give full access
+
+GRANT ALL PRIVILEGES ON Employees TO 'emp_user'@'localhost';
+
+Now user can:
+SELECT ✔
+INSERT ✔
+UPDATE ✔
+DELETE ✔
+
+---------------------------------------------------------------------------------------------
+
+Step 5: REVOKE (Remove Permission)
+
+Q4: Remove Select, INSERT permission
+
+Syntax: REVOKE privileges ON database_name.* FROM 'username'@'host';
+
+REVOKE select ON swiftcart.employees from 'emp_user3'@'localhost';
+
+REVOKE insert ON swiftcart.employees from 'Akash'@'localhost';
+
+REVOKE update ON swiftcart.employees from 'Akash'@'localhost';
+
+
+Revoke All Permissions
+
+REVOKE ALL privileges ON swiftcart.* from 'user1'@'localhost';
+
+REVOKE ALL privileges ON *.* from 'user1'@'localhost';
+
+----------------------------------------------------------------------------
+NOTE: if got error in workbench: in delete/update permissions.
+SET SQL_SAFE_UPDATES = 0;
+
+SQL_SAFE_UPDATES is a MySQL safety feature that prevents accidental deletion or 
+updating of large amounts of data.
+---------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------------------
+
+TCL
+--------------------------------------------------------------------------------------------------------------------------
+
+START TRANSACTION
+        ↓
+Make Changes (INSERT / UPDATE / DELETE)
+        ↓
+SAVEPOINT savepoint_name   ← optional checkpoint
+        ↓
+More Changes
+        ↓
+ROLLBACK TO savepoint_name  → Undo partial changes
+        ↓
+COMMIT  → Save permanently
+OR
+ROLLBACK → Cancel entire transaction
+
+
+SELECT @@autocommit;
+1 → ✅ Autocommit is ON (default)
+0 → ❌ Autocommit is OFF
+
+SET autocommit = 0;
+
+select database(); -- to check on database.
+
+open 2sessions, 1 session you change to SET autocommit = 0;
+
+
+ Create Table
+CREATE TABLE employees (
+    emp_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    salary INT,
+    dept_id INT
+);
+
+-- Insert Sample Data
+INSERT INTO employees VALUES
+(101, 'Rahul', 50000, 10),
+(102, 'Anita', 60000, 20),
+(103, 'Kiran', 45000, 30),
+(104, 'Meena', 47000, 30),
+(105, 'Arjun', 55000, 10);
+
+commit;
+
+SET autocommit = 0;
+
+INSERT INTO employees VALUES
+(111, 'Rahulsingh', 60000, 10);
+
+dont commit;
+check - select * from employees; in both session.
+
+rollback; - it returns to old data.
+
+INSERT INTO employees VALUES
+(109, 'Kiran', 45000, 30),
+(115, 'Meena', 47000, 30),
+(118, 'Arjun', 55000, 10);
+
+savepoint sp1;
+
+INSERT INTO employees VALUES
+(120, 'Kiran', 77000, 30),
+(122, 'Priya', 65000, 10);
+
+rollback to sp1;
+
+
+INSERT INTO employees VALUES
+(125, 'Kiran', 77000, 30);
+
+------------------------------------------------------------------------------------
+1. Sample Dataset (Table + Data)
+
+Create Table
+
+CREATE TABLE employees (
+    emp_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    salary INT,
+    dept_id INT
+);
+
+Insert Sample Data
+
+INSERT INTO employees VALUES
+(101, 'Rahul', 50000, 10),
+(102, 'Anita', 60000, 20),
+(103, 'Kiran', 45000, 30),
+(104, 'Meena', 47000, 30),
+(105, 'Arjun', 55000, 10);
+
+-----------------------------------------------------------------------------------------------------------------------
+Q1: Update salary and commit changes- Increase salary of emp_id = 101 to 80000 and save it permanently
+
+
+START TRANSACTION;
+
+UPDATE employees
+SET salary = 80000
+WHERE emp_id = 101;
+
+COMMIT;
+
+---------------------------------------------------------------------------------------------------------
+
+Q2: Update salary and rollback- Increase all salaries to 100000 but undo changes
+
+
+START TRANSACTION;
+
+UPDATE employees
+SET salary = 100000;
+
+ROLLBACK;
+
+NOTE:No changes saved
+
+-----------------------------------------------------------------------------------------------------------
+
+Q3: Insert a record and rollback - Insert new employee but cancel it
+
+START TRANSACTION;
+
+INSERT INTO employees VALUES (106, 'Priya', 52000, 20);
+
+ROLLBACK;
+
+NOTE: Record not inserted
+--------------------------------------------------------------------------------------------------------------
+Q4: Insert a record and commit - Insert new employee and save
+
+START TRANSACTION;
+
+INSERT INTO employees VALUES (107, 'Ravi', 48000, 20);
+
+COMMIT;
+
+Note: Record saved
+
+----------------------------------------------------------------------------------------------------------------
+Q5: Use SAVEPOINT - Insert 2 records but rollback only second one
+
+START TRANSACTION;
+
+INSERT INTO employees VALUES (108, 'Neha', 53000, 30);
+
+SAVEPOINT sp5;
+
+INSERT INTO employees VALUES (109, 'Amit', 60000, 30);
+
+ROLLBACK TO sp5;
+
+COMMIT;
+
+NOte:
+ Neha inserted
+ Amit not inserted
+---------------------------------------------------------------------------------------------------------------------
+
+Q6: Partial rollback with update- Update salary but undo only last update
+
+START TRANSACTION;
+
+UPDATE employees
+SET salary = salary + 5000
+WHERE emp_id = 101;
+
+SAVEPOINT sp1;
+
+UPDATE employees
+SET salary = salary + 10000
+WHERE emp_id = 102;
+
+ROLLBACK TO sp1;
+
+COMMIT;
+
+NOTE:
+ First update saved
+ Second update undone
+
+--------------------------------------------------------------------------------------------------------------------
+
+Q7: Multiple operations + commit - Perform insert, update, delete together
+
+START TRANSACTION;
+
+INSERT INTO employees VALUES (111, 'Sita', 49000, 40);
+
+UPDATE employees
+SET salary = salary * 1.10
+WHERE dept_id = 10;
+
+DELETE FROM employees
+WHERE emp_id = 103;
+
+COMMIT;
+
+All changes saved together
+
+
+-------------------------------------------------------------------------------------------
+
+note : my reference - in cmd line
+Login as user:
+
+mysql -u emp_user -p
+SELECT * FROM Employees;
+Output
+1 Ravi 30000
+2 Anu 40000
+
+cd "C:\Program Files\MySQL\MySQL Server 8.0\bin"
+---------------------------------------------------------------------------------------------
+Q2: Try INSERT (without permission)
+
+INSERT INTO Employees VALUES (3, 'Kiran', 35000);
+
+❌ Output
+ERROR: INSERT command denied to user
+
+
+
+CREATE USER 'emp_user1'@'localhost' IDENTIFIED BY '1234';
+
+grant select on *.* to 'emp_user1'@'localhost';
+
+grant insert on *.* to 'emp_user1'@'localhost';
+
+
+

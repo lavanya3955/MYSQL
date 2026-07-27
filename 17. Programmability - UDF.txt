@@ -1,0 +1,330 @@
+==========================================================
+USER DEFINED FUNCTIONS (UDF) IN MYSQL
+==========================================================
+
+1. WHAT IS A USER DEFINED FUNCTION?
+----------------------------------------------------------
+
+A User Defined Function (UDF) is a function created by the user 
+to perform a specific task and return a single value.
+
+Simple Definition:
+A UDF is a reusable function written by the user that returns one value.
+
+A User Defined Function is a reusable function that returns a single value based on given input.
+----------------------------------------------------------
+
+2. WHY UDF?
+----------------------------------------------------------
+
+We use UDF when:
+
+- We want to reuse logic multiple times
+- We want to simplify complex queries
+- We want cleaner and readable SQL
+- We need custom calculations not available in built-in functions
+
+----------------------------------------------------------
+
+3. KEY FEATURES
+----------------------------------------------------------
+
+- Returns only ONE value
+- Can accept input parameters
+- Can be used inside SELECT, WHERE, etc.
+- Improves code reusability
+
+----------------------------------------------------------
+
+4. SYNTAX
+----------------------------------------------------------
+
+DELIMITER //
+
+CREATE FUNCTION function_name(parameter datatype)
+RETURNS return_datatype
+DETERMINISTIC
+
+BEGIN
+    -- logic
+    RETURN value;
+END //
+
+DELIMITER ;
+
+----------------------------------------------------------
+
+5. IMPORTANT TERMS
+----------------------------------------------------------
+
+DELIMITER:
+- Changes default delimiter (;) to something else (like //)
+- Needed to define function block
+
+RETURNS:
+- Specifies return type
+
+DETERMINISTIC:
+- Same input → same output
+Every time you run the function with the same input, you get the same output.
+
+A parameter is a variable used to receive data when we call a function.
+
+DETERMINISTIC EXAMPLE :
+
+DELIMITER $$
+
+CREATE FUNCTION AddTen(num INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    RETURN num + 10;
+END $$
+
+DELIMITER ;
+
+
+select AddTen(5) → 15
+select AddTen(5) → 15
+select AddTen(5) → 15
+
+NON-DETERMINISTIC Function
+
+DELIMITER //
+
+CREATE FUNCTION CurrentTimeFunc()
+RETURNS DATETIME
+NOT DETERMINISTIC
+NO SQL
+BEGIN
+    RETURN NOW();
+END //
+
+DELIMITER ;
+
+
+Call 1 → 10:01:05 -- SELECT CurrentTimeFunc();
+Call 2 → 10:01:10 -- SELECT CurrentTimeFunc();
+Call 3 → 10:01:15 -- SELECT CurrentTimeFunc();
+
+NO SQL = No table access
+
+✔ No SELECT from tables
+✔ No INSERT
+✔ No UPDATE
+✔ No DELETE
+
+Only calculations or built-in operations.
+----------------------------------------------------------
+
+6. Functions EXAMPLES
+----------------------------------------------------------
+
+Example 1: Simple Addition Function
+
+DELIMITER //
+
+CREATE FUNCTION add_numbers(a INT, b INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    RETURN a + b;
+END //
+
+DELIMITER ;
+
+Usage:
+SELECT add_numbers(5, 3);
+
+Output:
+8
+
+----------------------------------------------------------
+** how we will use in our queries: 
+
+CREATE TABLE Numbers (
+num1 INT,
+num2 INT
+);
+
+INSERT INTO Numbers VALUES
+(2, 3),
+(5, 7),
+(10, 20);
+
+Query:
+1.Create and use a MySQL function named add_numbers that accepts two integers and returns their sum.
+Write a query to:
+Display num1, num2, and the calculated result using the function.
+
+SELECT num1, num2, add_numbers(num1, num2) AS result
+FROM Numbers;
+
++------+------+--------+
+| num1 | num2 | result |
++------+------+--------+
+|    2 |    3 |      5 |
+|    5 |    7 |     12 |
+|   10 |   20 |     30 |
++------+------+--------+
+3 rows in set (0.00 sec)
+----------------------------------------------------------
+2.Write a query to: Display only those rows where the sum of num1 and num2 is greater than 10.
+
+SELECT num1, num2, add_numbers(num1, num2) AS result
+FROM Numbers where add_numbers(num1, num2)>10;
+
++------+------+--------+
+| num1 | num2 | result |
++------+------+--------+
+|    5 |    7 |     12 |
+|   10 |   20 |     30 |
++------+------+--------+
+2 rows in set (0.00 sec)
+
+----------------------------------------------------------
+
+Example 2: Check Even or Odd
+
+DELIMITER //
+
+CREATE FUNCTION check_even_odd(num INT)
+RETURNS VARCHAR(10)
+DETERMINISTIC
+BEGIN
+    IF num % 2 = 0 THEN
+        RETURN 'Even';
+    ELSE
+        RETURN 'Odd';
+    END IF;
+END //
+
+DELIMITER ;
+
+Usage:
+SELECT check_even_odd(7);
+
+Output:
+Odd
+----------------------------------------------------------
+USING FUNCTION IN CONDITIONS (EVEN / ODD)
+----------------------------------------------------------
+Q1.Classify Numbers as Even or Odd Using a User Defined Function
+
+CREATE TABLE TestNumbers (
+num INT
+);
+
+INSERT INTO TestNumbers VALUES
+(1), (2), (3), (4), (5);
+
+
+SELECT num, check_even_odd(num) AS type
+FROM TestNumbers;
+----------------------------------------------------------
+FILTER USING FUNCTION
+
+Q1. Write a query to Display the number along with its type (Even/Odd) using the function.
+
+SELECT *
+FROM TestNumbers
+WHERE check_even_odd(num) = 'Even';
+
+SELECT *
+FROM TestNumbers
+WHERE check_even_odd(num) = 'odd';
+----------------------------------------------------------
+
+Example 3: Get Full Name
+
+DELIMITER //
+
+CREATE FUNCTION full_name(fname VARCHAR(50), lname VARCHAR(50))
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    RETURN CONCAT(fname, ' ', lname);
+END //
+
+DELIMITER ;
+
+Usage:
+SELECT full_name('Ravi', 'Kumar');
+
+----------------------------------------------------------
+CREATE TABLE Employees (
+fname VARCHAR(50),
+lname VARCHAR(50)
+);
+
+INSERT INTO Employees VALUES
+('Ravi', 'Kumar'),
+('Anu', 'Sharma'),
+('Kiran', 'Reddy');
+
+write a query to Display the full name of all employees using the function.
+
+SELECT full_name(fname, lname) AS FullName
+FROM Employees;
+
+Write a query to Retrieve employee details whose full name is 'Ravi Kumar'.
+SELECT *
+FROM Employees where full_name(fname, lname) ='Ravi Kumar';
+
+Write a query to Display only the Full Name column for employee 'Ravi Kumar'.
+
+SELECT full_name(fname, lname) AS FullName
+FROM Employees where full_name(fname, lname) ='Ravi Kumar';
+
+----------------------------------------------------------
+
+7. ADVANTAGES
+----------------------------------------------------------
+
+1. Code Reusability
+- Write once, use many times
+
+2. Cleaner Queries
+- Reduces complexity
+
+3. Modular Programming
+- Break logic into smaller parts
+
+4. Custom Logic
+- Create your own functions
+
+----------------------------------------------------------
+
+8. LIMITATIONS
+----------------------------------------------------------
+
+- Returns only single value
+- Cannot return multiple rows
+- Cannot perform INSERT/UPDATE/DELETE
+- Slower than built-in functions (in some cases)
+
+----------------------------------------------------------
+
+9. DROP FUNCTION
+----------------------------------------------------------
+
+DROP FUNCTION function_name;
+
+Example:
+DROP FUNCTION add_numbers;
+
+==========================================================
+
+| **UDF (User Defined Function)** | **Stored Procedure**                   |
+| ------------------------------- | -------------------------------------- |
+| Returns a single value          | Returns none, one, or multiple values  |
+| Used inside `SELECT`, `WHERE`   | Cannot be used inside queries          |
+| Called as part of a query       | Called using `CALL`                    |
+| Used for calculations           | Used for business logic/tasks          |
+| Does not modify data            | Can modify data (INSERT/UPDATE/DELETE) |
+| Only IN parameters              | IN, OUT, INOUT parameters              |
+| Simple logic                    | Complex logic supported                |
+| Executed within query           | Executed separately                    |
+| No transaction control          | Supports transactions                  |
+
+----------------------------------------------------------

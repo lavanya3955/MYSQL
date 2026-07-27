@@ -1,0 +1,413 @@
+==========================================================
+EVENTS IN MYSQL
+==================================================
+
+1. WHAT ARE EVENTS?
+==================================================
+Events in MySQL are scheduled tasks that run automatically
+at a specific time or at regular intervals.
+
+Simple Definition:
+Events are like alarms that execute SQL statements automatically.
+
+==================================================
+2. WHY DO WE USE EVENTS?
+========================
+
+* To automate repetitive tasks
+* To reduce manual work
+* To schedule operations at specific time
+* To run background jobs
+
+==================================================
+3. COMMON USE CASES
+===================
+
+* Daily report generation
+* Deleting old records
+* Data backup
+* Updating status automatically
+
+==================================================
+4. BASIC SYNTAX
+===============
+
+CREATE EVENT event_name
+ON SCHEDULE AT 'YYYY-MM-DD HH:MM:SS'
+DO
+SQL statement;
+
+Before creating events, enable scheduler:
+SET GLOBAL event_scheduler = ON;
+
+Check status:
+SHOW VARIABLES LIKE 'event_scheduler';
+
+Verify Event Created:
+SHOW EVENTS;
+
+
+==================================================
+EXAMPLE 1: RUN ONCE
+======================
+
+Create a MySQL EVENT that runs only once at a
+specific scheduled date and time.
+
+CREATE TABLE Employees(
+emp_id INT PRIMARY KEY,
+emp_name VARCHAR(50),
+salary INT,
+status VARCHAR(20)
+);
+
+INSERT INTO Employees VALUES
+(1,'Ravi',25000,'Pending'),
+(2,'Anu',45000,'Pending'),
+(3,'Kiran',28000,'Completed'),
+(4,'Meena',60000,'Pending'),
+(5,'John',20000,'Pending');
+
+CREATE EVENT delete_old_data
+ON SCHEDULE AT '2026-04-25 10:00:00'
+DO
+DELETE FROM Employees WHERE salary < 30000;
+
+CREATE EVENT delete_old_data
+ON SCHEDULE AT '2026-05-11 10:18:00'
+DO
+DELETE FROM Employees WHERE salary < 30000;
+
+==================================================
+EXAMPLE 2: RUN DAILY
+=======================
+
+CREATE TABLE Logs(
+log_id INT AUTO_INCREMENT PRIMARY KEY,
+message VARCHAR(255),
+created_at DATETIME
+);
+
+INSERT INTO Logs(message, created_at) VALUES
+('User Login','2026-03-01 10:00:00'),
+('File Uploaded','2026-03-20 12:30:00'),
+('Password Changed','2026-04-01 09:00:00'),
+('Report Generated','2026-04-15 14:10:00'),
+('System Backup','2026-05-01 08:00:00');
+
+Create a MySQL EVENT that runs every day and performs
+automatic cleanup of old log records.
+
+CREATE EVENT daily_cleanup
+ON SCHEDULE EVERY 1 DAY
+DO
+DELETE FROM Logs WHERE created_at < NOW() - INTERVAL 30 DAY;
+
+Suppose you create the event at: 6 May 2026 → 3:15 PM
+
+Then execution happens like this:
+
+1st run → 3:15 PM (today)
+2nd run → 3:15 PM tomorrow
+3rd run → 3:15 PM next day
+
+Same time daily.
+
+==================================================
+3 RUN EVERY NIGHT AT 12 AM
+   ==================================================
+   CREATE EVENT nightly_cleanup
+   ON SCHEDULE EVERY 1 DAY
+   STARTS '2026-04-25 00:00:00'
+   DO
+   DELETE FROM Logs
+   WHERE created_at < NOW() - INTERVAL 7 DAY;
+
+---
+
+Explanation:
+Runs daily at midnight (12 AM) and deletes old logs
+
+==================================================
+RUN EVERY DAY AT 2 AM (BACKUP TYPE TASK)
+===========================================
+
+CREATE EVENT daily_backup_flag
+ON SCHEDULE EVERY 1 DAY
+STARTS '2026-04-25 02:00:00'
+DO
+UPDATE Employees
+SET status = 'Processed'
+WHERE status = 'Pending';
+
+---
+
+CREATE EVENT daily_backup_flag
+ON SCHEDULE EVERY 1 DAY
+STARTS '2026-05-11 10:28:00'
+DO
+UPDATE Employees
+SET status = 'Processed'
+WHERE status = 'Pending';
+
+
+
+Explanation:
+Runs daily at 2 AM and updates records
+
+==================================================
+RUN EVERY 10 MINUTES
+=======================
+
+CREATE TABLE Orders(
+order_id INT PRIMARY KEY,
+customer_name VARCHAR(50),
+order_time DATETIME,
+status VARCHAR(20)
+);
+
+INSERT INTO Orders VALUES
+(1,'Ravi', NOW() - INTERVAL 2 HOUR,'Pending'),
+(2,'Anu', NOW() - INTERVAL 30 MINUTE,'Pending'),
+(3,'Kiran', NOW() - INTERVAL 3 HOUR,'Pending'),
+(4,'Meena', NOW() - INTERVAL 10 MINUTE,'Pending'),
+(5,'John', NOW() - INTERVAL 90 MINUTE,'Pending');
+
+
+Create a MySQL EVENT that runs every 10 minutes and:
+
+
+CREATE EVENT update_status_event
+ON SCHEDULE EVERY 10 MINUTE
+DO
+UPDATE Orders
+SET status = 'Expired'
+WHERE order_time < NOW() - INTERVAL 1 HOUR;
+
+Explanation:
+Checks every 10 minutes and updates expired orders
+
+==================================================
+RUN EVERY WEEK
+=================
+
+Create a MySQL event that runs every week starting from 2026-04-26 08:00:00 and 
+copies all records from the Employees table into the Reports table automatically.
+
+CREATE TABLE Reports(
+emp_id INT,
+emp_name VARCHAR(50),
+salary INT,
+status VARCHAR(20)
+);
+
+Note : Column order & datatype should match.
+
+CREATE EVENT weekly_report
+ON SCHEDULE EVERY 1 WEEK
+STARTS '2026-04-26 08:00:00'
+DO
+INSERT INTO Reports
+SELECT * FROM Employees;
+
+---
+
+Explanation:
+Runs weekly and stores report data
+
+==================================================
+RUN EVERY MONTH
+==================
+
+Create a MySQL event that runs every month starting from 2026-05-01 00:00:00 and 
+increases all employee salaries by 5% automatically.
+
+CREATE EVENT monthly_salary_update
+ON SCHEDULE EVERY 1 MONTH
+STARTS '2026-05-01 00:00:00'
+DO
+UPDATE Employees
+SET salary = salary + (salary * 0.05);
+
+---
+
+Explanation:
+Runs monthly and increases salary by 5%
+
+==================================================
+RUN AT SPECIFIC TIME DAILY
+=========================================
+CREATE TABLE Attendance_Log(
+log_time DATETIME,
+message VARCHAR(100)
+);
+
+INSERT INTO Attendance_Log VALUES
+('2026-04-24 09:00:00','Manual Check'),
+('2026-04-24 18:00:00','System Restart');
+
+Create a MySQL event that runs every day at 9 AM and 
+inserts a system check record into the Attendance_Log table automatically.
+
+
+CREATE EVENT daily_9am_task
+ON SCHEDULE EVERY 1 DAY
+STARTS '2026-04-25 09:00:00'
+DO
+INSERT INTO Attendance_Log
+VALUES (NOW(), 'System Checked');
+
+---
+
+Explanation:
+Runs every day at 9 AM
+
+==================================================
+NOTE:
+
+Events in MySQL work similar to cron jobs:
+They automatically execute SQL statements at
+scheduled times without manual intervention.
+
+==================================================
+
+DROP EVENT
+=============
+
+DROP EVENT event_name;
+
+==================================================
+IMPORTANT POINTS
+====================
+
+* Runs in background
+* Works like a scheduler
+* Must enable event_scheduler
+* Used for automation
+
+==================================================
+
+
+EVENTS: CRON-JOB LIKE TASK (NIGHTLY AGGREGATION EXAMPLE)
+
+==================================================
+SCENARIO
+========
+
+Every night, we want to calculate total sales
+and store it in a summary table.
+
+==================================================
+
+1. CREATE TABLES
+==================================================
+   CREATE TABLE Orders (
+   order_id INT,
+   amount INT,
+   order_date DATETIME
+   );
+
+CREATE TABLE Daily_Sales (
+sale_date DATE,
+total_amount INT
+);
+
+==================================================
+2. CREATE EVENT (RUNS EVERY NIGHT AT 12 AM)
+===========================================
+
+CREATE EVENT nightly_sales_aggregation
+ON SCHEDULE EVERY 1 DAY
+STARTS '2026-04-25 00:00:00'
+DO
+INSERT INTO Daily_Sales (sale_date, total_amount)
+SELECT
+CURDATE() - INTERVAL 1 DAY,
+SUM(amount)
+FROM Orders
+WHERE DATE(order_date) = CURDATE() - INTERVAL 1 DAY;
+
+Explanation:
+CREATE EVENT nightly_sales_aggregation   -- Create an event named nightly_sales_aggregation
+ON SCHEDULE EVERY 1 DAY                 -- Run the event every day
+STARTS '2026-04-25 00:00:00'            -- Start execution from this date at midnight (12 AM)
+DO
+INSERT INTO Daily_Sales (sale_date, total_amount)  -- Insert data into Daily_Sales table
+SELECT
+CURDATE() - INTERVAL 1 DAY,         -- Get yesterday's date
+SUM(amount)                         -- Calculate total sales amount
+FROM Orders                              -- Read data from Orders table
+WHERE DATE(order_date) = CURDATE() - INTERVAL 1 DAY;  -- Filter only yesterday's orders
+
+
+==================================================
+3. WHAT THIS DOES
+=================
+
+* Runs automatically every night at 12 AM
+* Calculates yesterday’s total sales
+* Stores result in Daily_Sales table
+
+==================================================
+
+
+STOPPING EVENTS IN MYSQL
+
+==================================================
+
+1. DISABLE EVENT (PAUSE)
+   ==================================================
+   ALTER EVENT nightly_sales_aggregation DISABLE;
+
+Explanation:
+
+* Stops the event from running
+* Event still exists in database
+* Can be enabled again later
+
+---
+
+## ENABLE EVENT AGAIN
+
+ALTER EVENT nightly_sales_aggregation ENABLE;
+
+Explanation:
+
+* Resumes the event execution
+
+==================================================
+2. DROP EVENT (DELETE)
+======================
+
+DROP EVENT nightly_sales_aggregation;
+
+Explanation:
+
+* Permanently deletes the event
+* Cannot be reused unless recreated
+
+==================================================
+3. SET END TIME (AUTO STOP)
+===========================
+
+CREATE EVENT nightly_sales_aggregation
+ON SCHEDULE EVERY 1 DAY
+STARTS '2026-04-25 00:00:00'
+ENDS '2026-05-01 00:00:00'
+DO
+-- SQL statement
+
+Explanation:
+
+* Event runs only until the END date
+* Automatically stops after that
+
+==================================================
+NOTE:
+===================
+
+* DISABLE → Pause the event
+* ENABLE → Resume the event
+* DROP → Delete the event
+* ENDS → Automatically stop event after a time
+

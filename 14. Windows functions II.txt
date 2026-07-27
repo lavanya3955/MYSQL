@@ -1,0 +1,120 @@
+
+------------------------------------------------------------------------------------------------------------
+LAG() - They’re used whenever you need “previous vs current” logic.
+------------------------------------------------------------------------------------------------------------
+
+LAG() and LEAD() do not depend on window frames because they directly access a specific row (previous/next), 
+unlike aggregate functions that operate on a set of rows.
+
+Aggregate (needs frame)
+SUM(salary) OVER (
+    ORDER BY salary
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+)
+
+
+Q1. Show previous employee salary based on salary Asc
+Solution:
+SELECT name, salary,
+LAG(salary) OVER (ORDER BY salary) AS prev_salary
+FROM Employees;
+
+Q2. Show previous salary within each department
+Solution:
+SELECT name, department, salary,
+LAG(salary) OVER (PARTITION BY department ORDER BY salary) AS prev_salary
+FROM Employees;
+
+------------------------------------------------------------------------------------------------------------
+
+LEAD() - They’re used whenever you need “current vs next” logic.
+------------------------------------------------------------------------------------------------------------
+Q1. Show next employee salary based on salary order
+Solution:
+SELECT name, salary,
+LEAD(salary) OVER (ORDER BY salary) AS next_salary
+FROM Employees;
+
+Q2. Show next salary within each department
+Solution:
+SELECT name, department, salary,
+LEAD(salary) OVER (PARTITION BY department ORDER BY salary) AS next_salary
+FROM Employees;
+
+------------------------------------------------------------------------------------------------------------
+
+NTILE(n) - divides rows into n equal groups and assigns a bucket number from 1 to n.
+------------------------------------------------------------------------------------------------------------
+
+Q1.Divide employees into 3 salary groups (high, medium, low) using NTILE
+
+SELECT 
+    name,
+    department,
+    salary,
+    NTILE(3) OVER (ORDER BY salary DESC) AS salary_group
+FROM Employees;
+
+
+Total rows = 9
+NTILE(3) → 3 groups
+Each group = 3 rows
+
+------------------------------------------------------------------------------------------------------------
+
+Q2.Divide employees into 2 groups within each department
+
+SELECT 
+    name,
+    department,
+    salary,
+    NTILE(2) OVER (
+        PARTITION BY department 
+        ORDER BY salary DESC
+    ) AS dept_group
+FROM Employees;
+
+------------------------------------------------------------------------------------------------------------
+Note:If rows are not evenly divisible,
+extra rows go to the earlier groups (starting from 1)
+
+Example: 7 rows, NTILE(3)
+
+7 ÷ 3 = 2 rows each
+Remainder = 1 extra row
+
+That extra row goes to Group 1
+
+-------------------------------------------------------------------------------------------------------
+
+Find the student(s) who have the 3rd highest marks using window function..
+
+
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    marks INT,
+    department VARCHAR(20)
+);
+
+INSERT INTO Students VALUES
+(1, 'Amit',   85, 'CS'),
+(2, 'Sneha',  92, 'IT'),
+(3, 'Ravi',   70, 'CS'),
+(4, 'Priya',  88, 'ECE'),
+(5, 'Kiran',  60, 'IT'),
+(6, 'Neha',   95, 'CS'),
+(7, 'Arjun',  75, 'ECE'),
+(8, 'Divya',  82, 'MECH'),
+(9, 'Rahul',  78, 'MECH'),
+(10,'Pooja',  91, 'IT'),
+(11,'Sharath', 85, 'IT');
+
+SELECT *
+FROM
+(
+    SELECT *,
+           DENSE_RANK() OVER(ORDER BY marks DESC) AS Rank_No
+    FROM Students
+) A
+WHERE Rank_No = 5;

@@ -1,0 +1,396 @@
+--------------------------------------------------------------------------------------
+CONSTRAINTS
+--------------------------------------------------------------------------------------
+
+Constraint is used to restrict the data that can be inserted into a table to ensure accuracy and integrity. 
+it can be specified while creating/altering the table statement.
+
+Constraints are rules applied to table columns to control and restrict the data stored in a table.
+
+
+NOT NULL → Column cannot have NULL values
+UNIQUE → All values must be different
+PRIMARY KEY → Uniquely identifies each row (NOT NULL + UNIQUE)
+CHECK → Ensures a condition is satisfied
+DEFAULT → Sets a default value if none is given
+FOREIGN KEY → Links one table to another (maintains relationship)
+
+NOTE :  DEFAULT works only when column is skipped, not when NULL is given
+
+	PRIMARY KEY = NOT NULL + UNIQUE (strict rule)
+
+	UNIQUE allows multiple NULLs (in MySQL) - Because NULL is not treated as a value. it is missing data. 
+	NULL ≠ NULL MySQL treats each NULL as different (unknown)
+
+---------------------------------------------------------------------------------------------
+
+NOT NULL Constraint
+---------------------------------------------------------------------------------------------
+Table Creation
+
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    age INT NOT NULL,
+    city VARCHAR(50)
+);
+
+---------------------------------------------------------------------------------------------
+Q1: Insert valid record
+
+INSERT INTO Students VALUES (1, 'Ravi', 20, 'Bangalore');
+
+Output
+Query OK, 1 row affected
+
+SELECT * FROM Students;
++------------+------+-----+-----------+
+| student_id | name | age | city      |
++------------+------+-----+-----------+
+| 1          | Ravi | 20  | Bangalore |
++------------+------+-----+-----------+
+
+
+---------------------------------------------------------------------------------------------
+Q2: Insert NULL in NOT NULL column
+
+INSERT INTO Students VALUES (2, NULL, 22, 'Chennai');
+
+Output
+ERROR: Column 'name' cannot be null
+
+---------------------------------------------------------------------------------------------
+Q3: Skip NOT NULL columns
+
+INSERT INTO Students (student_id, city) VALUES (3, 'Hyderabad');
+
+Output
+ERROR: Field 'name' doesn't have a default value
+
+
+---------------------------------------------------------------------------------------------
+UNIQUE Constraint
+---------------------------------------------------------------------------------------------
+Table Creation
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY,
+    email VARCHAR(100) UNIQUE,
+    phone VARCHAR(15) UNIQUE
+);
+
+Q1: Insert unique values
+INSERT INTO Employees VALUES (1, 'a@gmail.com', '9999999999');
+
+Output
+Query OK, 1 row affected
+
+Q2: Insert duplicate email
+
+INSERT INTO Employees VALUES (2, 'a@gmail.com', '8888888888');
+
+Output
+ERROR: Duplicate entry 'a@gmail.com' for key 'email'
+
+Q3: Insert NULL in UNIQUE column
+
+INSERT INTO Employees VALUES (3, NULL, NULL);
+
+INSERT INTO Employees VALUES (3, 0, NULL);
+
+insert into employees (emp_id,phone) values (4,'7897897');
+
+Output
+Query OK, 1 row affected
+
+SELECT * FROM Employees;
++--------+--------------+------------+
+| emp_id | email        | phone      |
++--------+--------------+------------+
+| 1      | a@gmail.com  | 9999999999 |
+| 3      | NULL         | NULL       |
++--------+--------------+------------+
+
+
+---------------------------------------------------------------------------------------------
+PRIMARY KEY
+---------------------------------------------------------------------------------------------
+
+Table Creation
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY,
+    product_name VARCHAR(50),
+    amount DECIMAL(10,2)
+);
+
+---------------------------------------------------------------------------------------------
+Q1: Insert valid data
+
+INSERT INTO Orders VALUES (101, 'Laptop', 50000);
+
+Output
+Query OK, 1 row affected
+
+---------------------------------------------------------------------------------------------
+Q2: Duplicate primary key
+
+INSERT INTO Orders VALUES (101, 'Mobile', 20000);
+
+Output
+ERROR: Duplicate entry '101' for key 'PRIMARY'
+
+---------------------------------------------------------------------------------------------
+Q3: NULL in primary key
+
+INSERT INTO Orders VALUES (NULL, 'Tablet', 15000);
+
+Output
+ERROR: Column 'order_id' cannot be null
+
+---------------------------------------------------------------------------------------------
+CHECK Constraint
+---------------------------------------------------------------------------------------------
+Table Creation
+
+CREATE TABLE Products (
+    product_id INT PRIMARY KEY,
+    price DECIMAL(10,2),
+    CHECK (price > 0)
+);
+
+INSERT INTO Products VALUES (1, 1000);
+
+INSERT INTO Products VALUES (1, -500); - fails
+
+-------------------------------------------------
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY,
+    salary INT,
+    CHECK (salary BETWEEN 1000 AND 5000)
+);
+
+
+INSERT INTO Employees VALUES (1, 2000);
+
+INSERT INTO Employees VALUES (2, 6000);-- fails
+
+----------------------------------------------------
+CREATE TABLE Users (
+    user_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    age INT,
+    CHECK (age >= 18)
+);
+
+INSERT INTO Users VALUES (1, 'Ravi', 25);
+
+INSERT INTO Users VALUES (2, 'Anu', 16); --- fails
+
+---------------------------------------------------------
+
+CREATE TABLE People (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    gender VARCHAR(10),
+    CHECK (gender IN ('Male', 'Female'))
+);
+
+INSERT INTO People VALUES (1, 'Ravi', 'Female');
+
+INSERT INTO People VALUES (1, 'Ravi', 'female'); --- fails
+
+----------------------------------------------------------------
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY,
+    quantity INT,
+    price INT,
+    CHECK (quantity > 0 AND price > 0)
+);
+
+INSERT INTO Orders VALUES (1, 10, 1000); 
+INSERT INTO Orders VALUES (1, -10, -1000);  --- fails
+
+---------------------------------------------------------------------------------------------
+DEFAULT Constraint
+
+---------------------------------------------------------------------------------------------
+Table Creation
+
+CREATE TABLE Customers (
+    customer_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    city VARCHAR(50) DEFAULT 'Bangalore'
+);
+
+
+---------------------------------------------------------------------------------------------
+Q1: Insert with city
+
+INSERT INTO Customers VALUES (1, 'Meena', 'Chennai');
+
+---------------------------------------------------------------------------------------------
+Q2: Insert without city
+
+INSERT INTO Customers (customer_id, name) VALUES (2, 'Kiran');
+
+SELECT * FROM Customers;
++-------------+-------+-----------+
+| customer_id | name  | city      |
++-------------+-------+-----------+
+| 1           | Meena | Chennai   |
+| 2           | Kiran | Bangalore |
++-------------+-------+-----------+
+
+
+---------------------------------------------------------------------------------------------
+Q3: Insert NULL explicitly
+
+INSERT INTO Customers VALUES (3, 'Ravi', NULL);
+
+SELECT * FROM Customers;
++-------------+-------+-----------+
+| customer_id | name  | city      |
++-------------+-------+-----------+
+| 3           | Ravi  | NULL      |
++-------------+-------+-----------+
+
+
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    salary INT DEFAULT 20000
+);
+
+
+INSERT INTO Employees VALUES (1, 'Ravi', 50000);
+
+INSERT INTO Employees (emp_id, name) VALUES (2, 'Anu'); --- default applied.
+
+
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY,
+    product_name VARCHAR(50),
+    status VARCHAR(20) DEFAULT 'Pending'
+);
+
+INSERT INTO Orders VALUES (101, 'Laptop', 'Shipped');
+
+INSERT INTO Orders (order_id, product_name) 
+VALUES (102, 'Mobile'); ---------- default applied
+---------------------------------------------------------------------------------------------
+FOREIGN KEY - A Foreign Key is a column in one table that links to the Primary Key of another table.
+----------------------------------------------------------------------------------------------
+Table Creation
+
+retrive name, dept_id,dept_name 
+
+CREATE TABLE Departments (
+    dept_id INT PRIMARY KEY,
+    dept_name VARCHAR(50)
+);
+
+CREATE TABLE Staff (
+    staff_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    dept_id INT,
+    FOREIGN KEY (dept_id) REFERENCES Departments(dept_id)
+);
+
+
+---------------------------------------------------------------------------------------------
+❓ Q1: Insert parent record
+
+INSERT INTO Departments VALUES (1, 'HR');
+
+---------------------------------------------------------------------------------------------
+Q2: Valid foreign key
+
+INSERT INTO Staff VALUES (101, 'Anu', 1);
+
+---------------------------------------------------------------------------------------------
+Q3: Invalid foreign key
+
+INSERT INTO Staff VALUES (102, 'Raj', 5);
+
+Output
+ERROR: Cannot add or update a child row: a foreign key constraint fails.
+-----------------------------------------------------------------------------------------------------
+CASCADE TABLE - CASCADE is one-way (Parent → Child only)
+
+NOTE:In SQL, ON DELETE CASCADE and ON UPDATE CASCADE are referential actions used with foreign key constraints.
+They define what happens to the child table rows when a corresponding row in the parent table is deleted 
+or updated.
+
+If a row in the parent table is deleted, all corresponding rows in the child table are automatically deleted.
+
+
+---Delete
+CREATE TABLE Departments2 (
+    dept_id INT PRIMARY KEY,
+    dept_name VARCHAR(50)
+);
+
+CREATE TABLE Staff2 (
+    staff_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    dept_id INT,
+    FOREIGN KEY (dept_id) REFERENCES Departments2(dept_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+INSERT INTO Departments2 VALUES (1, 'HR');
+INSERT INTO Departments2 VALUES (2, 'IT');
+
+INSERT INTO Staff2 VALUES (101, 'Anu', 1);
+INSERT INTO Staff2 VALUES (102, 'Raj', 1);
+INSERT INTO Staff2 VALUES (103, 'Raju', 2);
+
+
+Try this--
+DELETE FROM Departments2 WHERE dept_id = 1;
+
+NOTE: you cannot directly delete departments, first u need to drop staff table & departments table
+---Update
+
+INSERT INTO Departments2 VALUES (1, 'HR');
+INSERT INTO Departments2 VALUES (2, 'IT');
+
+UPDATE Departments2 SET dept_id = 10 WHERE dept_id = 2;
+
+select * from Departments2;
+
+select * from Staff2;
+
+UPDATE staff SET dept_id = 20 WHERE dept_id = 2; -- error
+
+
+---------------------------------------------------------------------------------------------
+
+
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY,
+    email VARCHAR(100) UNIQUE,
+    phone CHAR(10) UNIQUE,
+    CHECK (phone REGEXP '^[0-9]{10}$')
+);
+
+
+Explanation:
+
+CHAR(10) → Stores exactly 10 characters.
+UNIQUE → No duplicate phone numbers.
+CHECK → Ensures:
+^ = Start of string
+[0-9] = Digits only
+{10} = Exactly 10 digits
+$ = End of string
+
+
+--- Valid
+INSERT INTO Employees VALUES
+(1, 'john@gmail.com', '9876543210');
+
+INSERT INTO Employees VALUES
+(2, 'mary@gmail.com', '9998887776');
+
+--- invalid----
+INSERT INTO Employees VALUES
+(3, 'john@gmail.com', '76543210');

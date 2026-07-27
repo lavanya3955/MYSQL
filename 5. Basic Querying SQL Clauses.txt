@@ -1,0 +1,313 @@
+---------------------------------------------------------------------------------------------------
+Clauses
+----------------------------------------------------------------------------------------------------
+Clauses are parts of an SQL query that tell the database what to do and how to do it.
+
+
+SELECT → choose columns to display
+FROM → specify table
+WHERE → filter rows (condition)
+ORDER BY → sort data
+GROUP BY → group rows
+HAVING → filter grouped data
+LIMIT → restrict number of rows & OFFSET for skipping
+
+------------------------------------------------------------------------------------------------------
+
+Create Database & Table
+
+CREATE DATABASE Clause_Practice;
+USE Clause_Practice;
+
+CREATE TABLE Students (
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50),
+    department VARCHAR(50),
+    marks INT,
+    age INT,
+    city VARCHAR(50)
+);
+
+-- 2. Insert Sample Data
+INSERT INTO Students (name, department, marks, age, city) VALUES
+('Amit', 'CS', 85, 20, 'Bangalore'),
+('Sneha', 'IT', 90, 21, 'Hyderabad'),
+('Ravi', 'CS', 70, 22, 'Chennai'),
+('Priya', 'ECE', 88, 20, 'Bangalore'),
+('Kiran', 'IT', 60, 23, 'Mumbai'),
+('Neha', 'CS', 95, 21, 'Delhi'),
+('Arjun', 'ECE', 75, 22, 'Chennai'),
+('Divya', 'IT', 82, 20, 'Hyderabad');
+
+
+------------------------------------------------------------------------------------------------------
+SELECT Clause
+------------------------------------------------------------------------------------------------------
+
+Questions
+Display all columns from Students
+Show only name and marks
+Display distinct departments
+
+Answers
+-- 1
+SELECT * FROM Students;
+
+-- 2
+SELECT name, marks FROM Students;
+
+-- 3
+SELECT DISTINCT department FROM Students;
+
+------------------------------------------------------------------------------------------------------
+WHERE Clause
+
+------------------------------------------------------------------------------------------------------
+
+Questions
+Students with marks > 80
+Students from Bangalore
+Students with age < 22
+
+Answers
+
+SELECT * FROM Students WHERE marks > 80;
+
+
+SELECT * FROM Students WHERE city = 'Bangalore';
+
+SELECT * FROM Students WHERE age < 21;
+
+------------------------------------------------------------------------------------------------------
+ORDER BY Clause
+ASC default
+------------------------------------------------------------------------------------------------------
+Questions
+
+Sort students by marks ascending
+Sort students by marks descending
+Sort by department, then marks
+
+Answers
+
+SELECT * FROM Students ORDER BY marks;
+
+
+SELECT * FROM Students ORDER BY marks DESC;
+
+
+SELECT * FROM Students ORDER BY department, marks DESC;
+
+-- Multi level sorting
+SELECT * FROM Students ORDER BY department DESC, marks DESC;
+------------------------------------------------------------------------------------------------------
+GROUP BY Clause
+combine rows having the same values and perform calculations on each group.
+
+It is mostly used with aggregate functions.
+select the grouped column + aggregates
+------------------------------------------------------------------------------------------------------
+Questions
+
+Count students in each department
+Find average marks per department
+Find maximum marks in each department
+
+Answers
+
+SELECT department, COUNT(*) FROM Students GROUP BY department;
+
+
+SELECT department, AVG(marks) FROM Students GROUP BY department;
+
+
+SELECT department, MAX(marks) FROM Students GROUP BY department;
+
+
+------------------------------------------------------------------------------------------------------
+HAVING Clause
+
+------------------------------------------------------------------------------------------------------
+Questions
+Departments with more than 2 students
+Departments with average marks > 80
+
+Answers
+
+SELECT department, COUNT(*) 
+FROM Students 
+GROUP BY department 
+HAVING COUNT(*) > 2;
+
+
+SELECT department, AVG(marks) 
+FROM Students 
+GROUP BY department 
+HAVING AVG(marks) > 80;
+
+SELECT department, AVG(marks) AS avg_marks
+FROM Students
+GROUP BY department
+HAVING AVG(marks) > 80
+ORDER BY AVG(marks) ASC;
+
+SELECT department, AVG(marks) AS avg_marks
+FROM Students
+GROUP BY department
+HAVING AVG(marks) > 80
+ORDER BY AVG(marks) desc;
+
+===============================================================================
+WHERE + HAVING TOGETHER
+===============================================================================
+
+Example 1:
+-----------
+Question:
+Find departments having an average marks greater than 80, considering only students who scored more 
+than 70 marks.
+
+Query:
+SELECT department,
+       AVG(marks) AS Avg_Marks
+FROM Students
+WHERE marks > 70
+GROUP BY department
+HAVING AVG(marks) > 80;
+
+Explanation:
+1. WHERE marks > 70 filters individual student records first.
+2. GROUP BY department groups the remaining students by department.
+3. AVG(marks) calculates the average marks for each department.
+4. HAVING AVG(marks) > 80 keeps only those departments whose average is greater than 80.
+
+SELECT department,
+       AVG(marks) AS Avg_Marks
+FROM Students
+WHERE marks > 90
+GROUP BY department
+HAVING AVG(marks) < 80;
+===============================================================================
+
+Example 2:
+-----------
+Question:
+Find cities having more than one student whose age is greater than 20.
+
+Query:
+SELECT city,
+       COUNT(*) AS Total_Students
+FROM Students
+WHERE age > 20
+GROUP BY city
+HAVING COUNT(*) > 1;
+
+Explanation:
+1. WHERE age > 20 selects only students older than 20.
+2. GROUP BY city groups those students city-wise.
+3. COUNT(*) counts the number of students in each city.
+4. HAVING COUNT(*) > 1 displays only cities having more than one student.
+
+
+===============================================================================
+
+Example 3:
+-----------
+Question:
+Find departments whose total marks exceed 150, considering only students aged 20 or above.
+
+Query:
+SELECT department,
+       SUM(marks) AS Total_Marks
+FROM Students
+WHERE age >= 20
+GROUP BY department
+HAVING SUM(marks) > 150;
+
+Explanation:
+1. WHERE age >= 20 filters students aged 20 or above.
+2. GROUP BY department groups the students by department.
+3. SUM(marks) calculates the total marks for each department.
+4. HAVING SUM(marks) > 150 displays only departments whose total marks exceed 150.
+
+
+===============================================================================
+
+------------------------------------------------------------------------------------------------------
+LIMIT & OFFSET
+
+------------------------------------------------------------------------------------------------------
+
+Questions
+
+Get first 3 students
+Show top 3 students based on marks (highest marks)
+Skip first 2 records and show next 3
+Get 2nd highest scorer
+Get 3rd to 5th highest marks
+Get lowest 2 marks
+
+Answers
+
+SELECT * FROM Students
+LIMIT 3;
+
+SELECT * FROM Students 
+ORDER BY marks DESC 
+LIMIT 3;
+
+
+SELECT * FROM Students 
+LIMIT 3 OFFSET 2;
+
+SELECT * FROM Students
+ORDER BY marks DESC
+LIMIT 1 OFFSET 1;
+
+SELECT * FROM Students
+ORDER BY marks DESC
+LIMIT 3 OFFSET 2;
+
+SELECT * FROM Students
+ORDER BY marks ASC
+LIMIT 2;
+
+------------------------------------------------------------------------------------------------------
+COMBINED CLAUSES 
+
+------------------------------------------------------------------------------------------------------
+
+Questions
+Students with marks > 80, sorted by marks
+Count students in each city, show only cities with more than 1 student
+Show top 2 departments based on average marks
+Students from CS department with marks > 75
+
+Answers
+
+SELECT * FROM Students 
+WHERE marks > 80 
+ORDER BY marks DESC;
+
+
+SELECT city, COUNT(*) 
+FROM Students 
+GROUP BY city 
+HAVING COUNT(*) > 1;
+
+
+SELECT department, AVG(marks) AS avg_marks
+FROM Students
+GROUP BY department
+ORDER BY avg_marks DESC
+LIMIT 2;
+
+
+SELECT * FROM Students 
+WHERE department = 'CS' AND marks > 75;
+
+------------------------------------------------------------------------------------------------------
+
+**************execution order************************
+
+FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT

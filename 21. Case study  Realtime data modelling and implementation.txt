@@ -1,0 +1,809 @@
+===============================================================================
+PROJECT OVERVIEW
+===============================================================================
+
+This project is based on a real-world online grocery inventory dataset and
+demonstrates the complete workflow of a SQL Data Analyst. It covers
+understanding the dataset, importing data into MySQL, performing exploratory
+data analysis (EDA), cleaning the data, answering business questions using SQL,
+and generating meaningful business insights and recommendations.
+
+===============================================================================
+BUSINESS SCENARIO
+===============================================================================
+
+QuickMart is a fast-growing online grocery delivery company that offers a wide
+range of products, including fruits, vegetables, dairy products, beverages,
+snacks, personal care items, and household essentials.
+
+Customers can browse products, place orders, and have their groceries delivered
+to their doorstep through the QuickMart mobile application.
+
+Every day, thousands of products are listed, updated, and managed on the
+platform. To efficiently store and manage this large volume of product
+information, QuickMart relies on a relational database.
+
+The management wants to analyze product pricing, discounts, inventory levels,
+and product availability using SQL. The insights generated from this analysis
+help the business make informed decisions related to pricing strategies,
+inventory management, and product availability.
+
+===============================================================================
+REAL-WORLD QUESTION
+===============================================================================
+
+Imagine QuickMart sells thousands of grocery products every day.
+
+Where do you think all the product details—such as product name, category,
+price, discount, stock quantity, and availability—are stored?
+
+Answer:
+
+They are stored in a relational database, where SQL is used to retrieve,
+analyze, and manage the data efficiently.
+---------------------------------------------------------------
+Project Workflow
+
+Here’s a step-by-step breakdown of what we do in this project:
+
+Business Understanding
+        ↓
+Dataset Understanding
+        ↓
+Database Creation
+        ↓
+Table Creation
+        ↓
+Import Dataset
+        ↓
+Data Exploration (EDA)
+        ↓
+Data Cleaning
+        ↓
+SQL Analysis
+        ↓
+Business Insights
+        ↓
+Business Recommendations
+        ↓
+Project Conclusion
+
+===============================================================================
+
+2. BUSINESS PROBLEM
+-------------------------------------------------------------------------------
+
+Suppose you are working as a Data Analyst at QuickMart,
+
+Management wants answers to questions like:
+
+1. Which are the top 10 most expensive products based on MRP?
+
+2. Which are the top 10 cheapest products based on MRP?
+
+3. Which products have the highest discount percentage?
+
+4. Which products are currently out of stock?
+
+5. Which category contains the highest number of products?
+
+6. Which category offers the highest average discount?
+
+7. Which category has the highest total inventory available?
+
+8. Which products have no discount?
+
+9. Which products have the maximum difference between MRP and Selling Price?
+
+10. Which product names appear multiple times (different pack sizes/variants)?
+
+===============================================================================
+
+3. UNDERSTAND THE DATASET
+-------------------------------------------------------------------------------
+Before writing SQL queries, we should understand the dataset.
+
+• A dataset is simply a collection of related data stored in rows and columns.
+ This dataset contains more than 3000 grocery products sold by QuickMart.
+
+• Each row represents one product.
+Each row represents a unique SKU (Stock Keeping Unit) for a product. Duplicate product names exist
+because the same product may appear multiple times in different package sizes, weights, discounts, or 
+categories to improve visibility – exactly how real catalog data looks.
+
+Each column stores specific information about that product.
+
+Columns:
+
+1. Category
+   Indicates the type of product.
+   Examples: Fruits & Vegetables, Dairy, Snacks, Beverages,
+   Packaged Food, Personal Care, Home Care, Baby Care.
+
+2. Product Name
+   Name of the product.
+   Examples: Fresh Banana, Amul Gold Milk, Maggi Noodles,
+   Coca-Cola Soft Drink, Lay's Chips.
+
+3. MRP (Maximum Retail Price)
+   The original price of the product before any discount.
+   Example: ₹120.
+
+4. Discount Percentage
+   Percentage of discount offered on the product.
+   Example: 10%, 20%, 35%.
+
+5. Discounted Selling Price
+   Final price paid by the customer after applying the discount.
+   Example: MRP ₹120 with 20% discount → Selling Price ₹96.
+
+6. Available Quantity
+   Number of units currently available in inventory.
+   Example: 150 units.
+
+7. Weight in Grams
+   Weight of the product.
+   Examples: 250g, 500g, 1kg.
+
+8. Out Of Stock
+   Indicates whether the product is currently unavailable.
+   TRUE = Out of Stock
+   FALSE = Available for Purchase
+
+9. Quantity
+   Number of items or units in a single pack.
+   Examples: 1, 2, 6, 12.
+
+10.sku_id: Unique identifier for each product entry (Synthetic Primary Key)
+
+===============================================================================
+
+4. CREATE DATABASE
+-------------------------------------------------------------------------------
+
+• Create Database
+• Use Database
+• Create Table
+• Explain datatypes used.
+------------------------
+
+CREATE DATABASE QuickMart;
+USE QuickMart;
+
+CREATE TABLE QuickMart(
+    category VARCHAR(120),
+    name VARCHAR(150) NOT NULL,
+    mrp DECIMAL(8,2),
+    discountPercent DECIMAL(5,2),
+    availableQuantity INT,
+    discountedSellingPrice DECIMAL(8,2),
+    weightInGms INT,
+    outOfStock BOOLEAN,
+    quantity INT
+);
+
+desc QuickMart;
+
+===============================================================================
+
+5. IMPORT DATASET
+-------------------------------------------------------------------------------
+
+• Import CSV into MySQL.
+• Verify the imported data.
+• Check whether all records are loaded.
+
+-----------------------------------------------
+Right-click on Tables.
+Select: Table Data Import Wizard
+
+Browse and select the CSV file.
+
+Verify that the column mapping is correct.
+Click Finish.
+
+Wait until the import completes successfully.
+
+SELECT * FROM QuickMart;
+
+
+SELECT COUNT(*) FROM QuickMart;
+
+If both match, the dataset has been imported successfully.
+
+===============================================================================
+
+===============================================================================
+6. DATA EXPLORATION (EDA)
+===============================================================================
+
+Understand the data before starting the analysis.
+
+Examples:
+
+• Total Products
+• Total Categories
+• Product Categories
+• Highest Price
+• Lowest Price
+• Average Price
+• Inventory Availability
+• Product Availability
+• Duplicate Product Names
+
+-------------------------------------------------------------------------------
+
+-- 1. Total Number of Products
+
+SELECT COUNT(*) AS Total_Products FROM QuickMart;
+
+-------------------------------------------------------------------------------
+
+-- 2. Total Number of Categories
+
+SELECT COUNT(DISTINCT category) AS Total_Categories FROM QuickMart;
+
+-------------------------------------------------------------------------------
+
+-- 3. Display All Categories
+
+SELECT DISTINCT category FROM QuickMart ORDER BY category;
+
+-------------------------------------------------------------------------------
+
+-- 4. Highest MRP (Original Price)
+
+SELECT MAX(mrp) AS Highest_MRP FROM QuickMart;
+
+-------------------------------------------------------------------------------
+
+-- 5. Lowest MRP (Original Price)
+
+SELECT MIN(mrp) AS Lowest_MRP FROM QuickMart;
+
+-------------------------------------------------------------------------------
+
+-- 6. Average MRP
+
+SELECT ROUND(AVG(mrp),2) AS Average_MRP FROM QuickMart;
+
+-------------------------------------------------------------------------------
+
+-- 7. Highest Selling Price
+
+SELECT MAX(discountedSellingPrice) AS Highest_Selling_Price FROM QuickMart;
+
+-------------------------------------------------------------------------------
+
+-- 8. Lowest Selling Price
+
+SELECT MIN(discountedSellingPrice) AS Lowest_Selling_Price FROM QuickMart;
+
+-------------------------------------------------------------------------------
+
+-- 9. Average Selling Price
+
+SELECT ROUND(AVG(discountedSellingPrice),2) AS Average_Selling_Price FROM QuickMart;
+
+-------------------------------------------------------------------------------
+
+-- 10. Total Inventory Available
+
+SELECT SUM(availableQuantity) AS Total_Inventory FROM QuickMart;
+
+-------------------------------------------------------------------------------
+
+-- 11. Products In Stock vs Out Of Stock
+
+SELECT outOfStock, COUNT(*) AS Total_Products
+FROM QuickMart
+GROUP BY outOfStock;
+
+-------------------------------------------------------------------------------
+
+-- 12. Product Names Appearing Multiple Times
+
+SELECT name, COUNT(*) AS Number_of_SKUs
+FROM QuickMart
+GROUP BY name
+HAVING COUNT(*) > 1
+ORDER BY COUNT(*) DESC;
+-------------------------------------------------------------------------------
+-- 13. Total Number of Out-of-Stock Products
+
+SELECT COUNT(*) AS Out_Of_Stock_Products
+FROM QuickMart
+WHERE outOfStock = 1;
+
+-------------------------------------------------------------------------------
+
+-- 14. Total Number of Available Products
+
+SELECT COUNT(*) AS Available_Products
+FROM QuickMart
+WHERE outOfStock = 0;
+
+-------------------------------------------------------------------------------
+
+-- 15. Total Inventory by Category
+
+SELECT category, SUM(availableQuantity) AS Total_Inventory
+FROM QuickMart
+GROUP BY category
+ORDER BY Total_Inventory DESC;
+===============================================================================
+
+7. DATA CLEANING
+-------------------------------------------------------------------------------
+Check for:
+
+Step 1 → Check NULL Values
+
+Step 2 → Check Duplicate Records
+
+Step 3 → Check Missing / Zero Values
+
+Step 4 → Check Invalid Data
+
+Step 5 → Correct the Data
+
+Step 6 → Validate Again
+
+Clean the dataset before analysis.
+
+===============================================================================
+CHECKING FOR NULL (MISSING) VALUES
+===============================================================================
+
+Purpose:
+
+Before analyzing the data, we need to ensure that all important fields
+contain valid values.
+
+This query checks whether any product has missing information.
+
+If any column contains NULL, that record will be displayed.
+
+If no rows are returned, it means there are no missing values in the dataset.
+
+-------------------------------------------------------------------------------
+
+Query:
+
+SELECT *
+FROM zepto
+WHERE name IS NULL
+   OR category IS NULL
+   OR mrp IS NULL
+   OR discountPercent IS NULL
+   OR discountedSellingPrice IS NULL
+   OR weightInGms IS NULL
+   OR availableQuantity IS NULL
+   OR outOfStock IS NULL
+   OR quantity IS NULL;
+
+-------------------------------------------------------------------------------
+Missing values can lead to:
+
+• Incorrect calculations
+• Wrong reports
+• Inaccurate business insights
+• Errors in data analysis
+
+Therefore, checking for NULL values is an important step in Data Cleaning.
+
+Example:
+
+Suppose a product has:
+
+Product Name : Amul Milk
+MRP          : NULL
+Discount     : 20%
+
+Can we calculate the selling price correctly?
+No.
+
+So, we first identify and handle missing values before performing analysis.
+
+How to Fix?
+
+Option 1: Update the missing values.
+
+Example:
+
+UPDATE QuickMart
+SET availableQuantity = 0
+WHERE availableQuantity IS NULL;
+
+UPDATE QuickMart
+SET discountPercent = 0
+WHERE discountPercent IS NULL;
+
+-------------------------------------------------------------------------------
+
+Option 2: Delete incomplete records (only if necessary).
+
+DELETE FROM QuickMart
+WHERE mrp IS NULL;
+
+===============================================================================
+2. CHECKING FOR DUPLICATE RECORDS
+===============================================================================
+
+Purpose:
+
+Find products that appear more than once.
+
+Query:
+
+SELECT name, COUNT(*) AS Total_Records
+FROM QuickMart
+GROUP BY name
+HAVING COUNT(*) > 1;
+
+-------------------------------------------------------------------------------
+
+Note:
+
+This does NOT always mean duplicate data.
+
+Example:
+
+Amul Milk 500ml
+
+Amul Milk 1L
+
+Amul Milk 2L
+
+Same product name,
+but different pack sizes.
+
+These are different SKUs.
+
+-------------------------------------------------------------------------------
+
+How to Fix?
+
+If they are genuine duplicate rows,
+remove the extra records.
+
+(Use only after verification.)
+
+Example:
+
+DELETE q1
+FROM QuickMart q1
+JOIN QuickMart q2
+ON q1.name = q2.name
+AND q1.category = q2.category
+AND q1.mrp = q2.mrp
+AND q1.quantity = q2.quantity
+WHERE q1.sku_id > q2.sku_id;
+
+Keep one record and remove the duplicates.
+
+===============================================================================
+3. CHECKING FOR MISSING DATA
+===============================================================================
+
+Purpose:
+
+Check whether important numeric values are missing or zero.
+
+Example:
+
+SELECT *
+FROM QuickMart
+WHERE mrp = 0
+OR discountedSellingPrice = 0
+OR availableQuantity = 0;
+
+-------------------------------------------------------------------------------
+
+Why?
+
+A product with price = 0 usually indicates incorrect data.
+
+-------------------------------------------------------------------------------
+
+How to Fix?
+
+Update the correct value.
+
+Example:
+
+UPDATE QuickMart
+SET mrp = 120
+WHERE sku_id = 1001;
+
+===============================================================================
+4. CHECKING FOR INVALID DATA
+===============================================================================
+
+Purpose:
+
+Find values that are logically incorrect.
+
+Examples:
+
+• Selling Price greater than MRP
+
+SELECT *
+FROM QuickMart
+WHERE discountedSellingPrice > mrp;
+
+-------------------------------------------------------------------------------
+
+• Discount less than 0%
+
+SELECT *
+FROM QuickMart
+WHERE discountPercent < 0;
+
+-------------------------------------------------------------------------------
+
+• Discount greater than 100%
+
+SELECT *
+FROM QuickMart
+WHERE discountPercent > 100;
+
+-------------------------------------------------------------------------------
+
+• Negative Quantity
+
+SELECT *
+FROM QuickMart
+WHERE availableQuantity < 0;
+
+-------------------------------------------------------------------------------
+
+• Negative Weight
+
+SELECT *
+FROM QuickMart
+WHERE weightInGms < 0;
+
+-------------------------------------------------------------------------------
+
+How to Fix?
+
+Update incorrect values.
+
+Example:
+
+UPDATE QuickMart
+SET discountPercent = 20
+WHERE sku_id = 1050;
+
+UPDATE QuickMart
+SET availableQuantity = 50
+WHERE availableQuantity < 0;
+
+===============================================================================
+5. VERIFY THE DATA AFTER CLEANING
+===============================================================================
+
+Run the validation queries again.
+
+If no incorrect records are returned,
+
+✓ Data Cleaning is successful.
+
+===============================================================================
+8. SQL ANALYSIS
+===============================================================================
+
+1. Which are the top 10 most expensive products based on MRP?
+
+SELECT name, category, mrp
+FROM QuickMart
+ORDER BY mrp DESC
+LIMIT 10;
+
+-------------------------------------------------------------------------------
+
+2. Which are the top 10 cheapest products based on MRP?
+
+SELECT name, category, mrp
+FROM QuickMart
+ORDER BY mrp ASC
+LIMIT 10;
+
+-------------------------------------------------------------------------------
+
+3. Which products have the highest discount percentage?
+
+SELECT name, category, discountPercent
+FROM QuickMart
+ORDER BY discountPercent DESC
+LIMIT 10;
+
+-------------------------------------------------------------------------------
+
+4. Which products are currently out of stock?
+
+SELECT name, category
+FROM QuickMart
+WHERE outOfStock = TRUE;
+
+-------------------------------------------------------------------------------
+
+5. Which category contains the highest number of products?
+
+SELECT category, COUNT(*) AS Total_Products
+FROM QuickMart
+GROUP BY category
+ORDER BY Total_Products DESC;
+
+-------------------------------------------------------------------------------
+
+6. Which category offers the highest average discount?
+
+SELECT category,
+ROUND(AVG(discountPercent),2) AS Average_Discount
+FROM QuickMart
+GROUP BY category
+ORDER BY Average_Discount DESC;
+
+-------------------------------------------------------------------------------
+
+7. Which category has the highest total inventory available?
+
+SELECT category,
+SUM(availableQuantity) AS Total_Inventory
+FROM QuickMart
+GROUP BY category
+ORDER BY Total_Inventory DESC;
+
+-------------------------------------------------------------------------------
+
+8. Which products have no discount?
+
+SELECT name, category, mrp, discountPercent
+FROM QuickMart
+WHERE discountPercent = 0;
+
+-------------------------------------------------------------------------------
+
+9. Which products have the maximum difference between MRP and Selling Price?
+
+SELECT name,
+category,
+mrp,
+discountedSellingPrice,
+(mrp - discountedSellingPrice) AS Discount_Amount
+FROM QuickMart
+ORDER BY Discount_Amount DESC
+LIMIT 10;
+
+-------------------------------------------------------------------------------
+
+10. Which product names appear multiple times (different pack sizes/variants)?
+
+SELECT name,
+COUNT(*) AS Number_of_Variants
+FROM QuickMart
+GROUP BY name
+HAVING COUNT(*) > 1
+ORDER BY Number_of_Variants DESC;
+
+===============================================================================
+
+9. BUSINESS INSIGHTS
+-------------------------------------------------------------------------------
+
+Interpret the results.
+------------
+Based on the SQL analysis, the following business insights can be derived:
+
+1. Product Pricing
+
+• Premium-priced products were identified using the MRP column.
+• Budget-friendly products were also identified for price comparison.
+
+-------------------------------------------------------------------------------
+
+2. Discount Analysis
+
+• Some products offer significantly higher discounts than others.
+• Certain categories provide better average discounts, making them attractive
+  to customers.
+
+-------------------------------------------------------------------------------
+
+3. Inventory Analysis
+
+• Some products are currently out of stock.
+• Categories with higher inventory indicate better stock availability.
+
+-------------------------------------------------------------------------------
+
+4. Product Distribution
+
+• Some categories contain a larger number of products compared to others,
+  indicating a wider variety for customers.
+
+-------------------------------------------------------------------------------
+
+5. Product Variants
+
+• Several product names appear multiple times because they are available
+  in different pack sizes, weights, or quantities.
+
+-------------------------------------------------------------------------------
+
+6. Pricing Strategy
+
+• The difference between MRP and Selling Price helps identify products
+  receiving the highest discounts.
+
+-------------------------------------------------------------------------------
+
+7. Category Performance
+
+• Average MRP and average discount vary across categories, indicating
+  different pricing and promotional strategies.
+
+===============================================================================
+10. BUSINESS RECOMMENDATIONS
+===============================================================================
+
+Based on the analysis, the following recommendations can help improve
+business performance.
+
+1. Improve Inventory Management
+
+• Frequently out-of-stock products should be restocked quickly to avoid
+  losing potential sales.
+
+-------------------------------------------------------------------------------
+
+2. Optimize Discount Strategy
+
+• Review products with extremely high discounts to ensure profitability.
+• Offer discounts strategically instead of applying them uniformly.
+
+-------------------------------------------------------------------------------
+
+3. Focus on High-Demand Categories
+
+• Maintain sufficient inventory for categories containing a large number
+  of products.
+
+-------------------------------------------------------------------------------
+
+4. Improve Product Pricing
+
+• Compare MRP and Selling Price regularly to maintain competitive pricing.
+
+-------------------------------------------------------------------------------
+
+5. Monitor Product Availability
+
+• Track products that repeatedly become out of stock and improve inventory
+  planning.
+
+-------------------------------------------------------------------------------
+
+6. Promote Low-Discount Products
+
+• Products with little or no discount can be promoted through special
+  offers or marketing campaigns.
+
+-------------------------------------------------------------------------------
+
+7. Analyze Product Variants
+
+• Similar products available in multiple pack sizes should be priced
+  appropriately to encourage customer purchases.
+
+-------------------------------------------------------------------------------
+
+8. Regular Data Quality Checks
+
+• Periodically validate the dataset for missing values, duplicate records,
+  and invalid data to ensure accurate reporting.
+
+===============================================================================
+

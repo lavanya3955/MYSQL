@@ -1,0 +1,1233 @@
+==========================================================
+STORED PROCEDURES IN MYSQL
+==========================================================
+
+1. WHAT IS A STORED PROCEDURE?
+----------------------------------------------------------
+
+A Stored Procedure is a group of SQL statements stored in the database 
+that can be executed together whenever needed.
+
+A pre-written SQL program - Stored inside the database - Executed whenever needed
+
+Simple Definition:
+A Stored Procedure is a saved set of SQL statements that can be executed repeatedly using a 
+CALL command.
+
+NOte:— Stored Procedures normally work on EXISTING tables.
+----------------------------------------------------------
+
+2. WHY STORED PROCEDURES?
+----------------------------------------------------------
+
+We use stored procedures when:
+
+- We want to reuse SQL logic
+- We want to reduce repetitive queries
+- We want faster execution
+- We want better security
+- We want to reduce network traffic
+
+----------------------------------------------------------
+
+3. KEY FEATURES
+----------------------------------------------------------
+
+- Can contain multiple SQL statements
+- Can take input parameters
+- Can return output
+- Stored in database permanently
+- Can be executed multiple times
+
+----------------------------------------------------------
+
+4. SYNTAX
+----------------------------------------------------------
+
+DELIMITER //
+
+CREATE PROCEDURE procedure_name (IN parameter datatype)
+BEGIN
+    -- SQL statements
+END //
+
+DELIMITER ;
+
+----------------------------------------------------------
+
+5. REAL LIFE usage - Where Stored Procedures are Used
+----------------------------------------------------------
+
+Used by developers & applications
+→ Backend (Java, Python, .NET) calls procedures to perform DB operations
+Used in web applications
+→ Example: When user clicks “Submit”, app calls a procedure
+Used in automation jobs
+→ Runs daily/nightly for reports, salary processing, data cleanup
+Used for business logic
+→ Complex operations (like banking transactions) handled inside DB
+Used for security
+→ Users don’t access tables directly, only execute procedures
+
+----------------------------------------------------------
+
+6. EXAMPLE 1: SIMPLE PROCEDURE
+----------------------------------------------------------
+
+CREATE TABLE Employees (
+emp_id INT PRIMARY KEY,
+name VARCHAR(50),
+department VARCHAR(50),
+salary INT
+);
+
+INSERT INTO Employees VALUES
+(1, 'Ravi', 'IT', 50000),
+(2, 'Anu', 'HR', 60000),
+(3, 'Kiran', 'IT', 45000),
+(4, 'Meena', 'Finance', 70000),
+(5, 'Rahul', 'IT', 55000);
+
+
+DELIMITER //
+
+CREATE PROCEDURE get_employees()
+BEGIN
+    SELECT * FROM Employees;
+END //
+
+DELIMITER ;
+
+CALL get_employees();
+
+----------------------------------------------------------
+TYPES OF PARAMETERS
+----------------------------------------------------------
+
+1. IN parameter
+- Sends input to procedure
+
+2. OUT parameter
+- Returns value from procedure
+
+3. INOUT parameter
+- Can send and return value
+
+----------------------------------------------------------
+==========================================================
+STORED PROCEDURE PARAMETERS - EXAMPLES
+==========================================================
+
+1. IN PARAMETER (INPUT)
+----------------------------------------------------------
+
+Purpose:
+- Used to pass input value to procedure
+- Cannot return value
+
+Example:
+Get employee name by ID
+
+DELIMITER //
+
+CREATE PROCEDURE get_emp_name(IN eid INT)
+BEGIN
+    SELECT name
+    FROM Employees
+    WHERE emp_id = eid;
+END //
+
+DELIMITER ;
+
+Usage:
+CALL get_emp_name(1);
+
+----------------------------------------------------------
+
+IN PARAMETER (INPUT) - PROCEDURE WITH CONDITION
+----------------------------------------------------------
+
+Create a stored procedure named check_salary that accepts a salary value as an IN parameter.
+
+Requirement:
+
+If the salary is greater than 50,000, display "High Salary".
+Otherwise, display "Low Salary".
+Use an IF condition inside the procedure.
+Execute the procedure by passing a salary value.
+
+
+DELIMITER //
+
+CREATE PROCEDURE check_salary(IN sal INT)
+BEGIN
+    IF sal > 50000 THEN
+        SELECT 'High Salary' AS Status;
+    ELSE
+        SELECT 'Low Salary' AS Status;
+    END IF;
+END //
+
+DELIMITER ;
+
+CALL check_salary(60000);
+
+----------------------------------------------------------
+
+2. OUT PARAMETER (OUTPUT)
+----------------------------------------------------------
+
+Purpose:
+- Used to return a value from procedure
+
+Create a stored procedure named total_employees that returns the total number of employees 
+present in the Employees table using an OUT parameter.
+
+Requirements
+Use an OUT parameter to return the result.
+Count total records from the Employees table.
+Store the result into the OUT parameter.
+Call the procedure and display the returned value.
+
+Get total number of employees
+----------
+
+DELIMITER //
+
+CREATE PROCEDURE total_employees(OUT total INT)
+BEGIN
+    SELECT COUNT(*) INTO total
+    FROM Employees;
+END //
+
+DELIMITER ;
+
+Usage:
+CALL total_employees(@total);
+SELECT @total;
+
+CALL total_employees(@overall);
+
+OUT parameter needs a user-defined variable (like @total) to store the returned value.
+total → inside procedure - Exists only inside procedure - Used for internal calculation
+@total → outside procedure - Exists outside procedure - Used to receive output
+
+total ≠ @total
+
+
+-- - SELECT COUNT(*) INTO total;
+total =5
+5=@total
+
+Inside procedure → variables are local
+Outside procedure → MySQL needs a variable to store output
+
+That variable must start with @
+
+----------------------------------------------------------
+3. INOUT PARAMETER (INPUT + OUTPUT)
+----------------------------------------------------------
+
+Purpose:
+- Takes input value
+- Returns modified value
+
+Example:
+
+Create a stored procedure named increase_salary that uses an INOUT parameter to update an 
+employee’s salary.
+
+Task
+The procedure should:
+Accept a salary value as input.
+Increase the salary by 10%.
+Return the updated salary using the same parameter.
+Use an INOUT parameter so that:
+The procedure receives the value.
+Modifies it internally.
+Sends the updated value back to the caller.
+
+
+Increase salary by 10%
+--------
+
+DELIMITER //
+
+CREATE PROCEDURE increase_salary(INOUT sal INT)
+BEGIN
+    SET sal = sal + (sal * 0.10);
+END //
+
+DELIMITER ;
+
+Usage:
+SET @salary = 50000;
+CALL increase_salary(@salary);
+SELECT @salary;
+
+Output:
+55000
+
+==========================================================
+STORED PROCEDURES FOR INSERT, UPDATE, DELETE
+
+----------------------------------------------------------
+1. INSERT PROCEDURE
+----------------------------------------------------------
+
+
+Create a stored procedure named add_employee to insert a new employee record into the Employees 
+table using input parameters.
+
+Task
+Create an Employees table with the following columns:
+emp_id
+name
+department
+salary
+Insert some sample employee records into the table.
+Write a stored procedure that:
+Accepts employee details as IN parameters.
+Inserts the provided values into the Employees table.
+Call the procedure to add a new employee named Reshma working in the IT department with a salary of 50000.
+
+
+CREATE TABLE Employees (
+emp_id INT PRIMARY KEY,
+name VARCHAR(50),
+department VARCHAR(50),
+salary INT
+);
+
+INSERT INTO Employees VALUES
+(1, 'Ravi', 'IT', 50000),
+(2, 'Anu', 'HR', 60000),
+(3, 'Kiran', 'IT', 45000),
+(4, 'Meena', 'Finance', 70000),
+(5, 'Rahul', 'IT', 55000);
+
+
+DELIMITER //
+
+CREATE PROCEDURE add_employee(
+IN p_id INT,
+IN p_name VARCHAR(50),
+IN p_department VARCHAR(100),
+IN p_salary INT
+)
+BEGIN
+INSERT INTO Employees VALUES (p_id, p_name, p_department, p_salary);
+END //
+
+DELIMITER ;
+
+CALL add_employee(6, 'Reshma','IT', 50000);
+
+------ multiple inserts ----
+
+DELIMITER //
+
+CREATE PROCEDURE add_multiple_employees()
+BEGIN
+
+INSERT INTO Employees VALUES
+(9,'Kavya','IT',52000),
+(10,'Manoj','HR',48000),
+(11,'Sneha','Finance',75000);
+
+END //
+
+DELIMITER ;
+
+CALL add_multiple_employees();
+
+
+----------------------------------------------------------
+1. INSERT PROCEDURE - create procedure with only 2 inputs.
+
+----------------------------------------------------------
+
+
+Create a stored procedure named add_employee_new that inserts a new employee into the Employees table using only selected columns.
+
+Task
+Assume an Employees table already exists with multiple columns (for example: emp_id, name, department, salary).
+Write a stored procedure that:
+Accepts employee ID and employee name as input parameters.
+Inserts values only into emp_id and name columns.
+Leaves other columns NULL or default.
+Execute the procedure to insert a new employee:
+Employee ID → 8
+Name → Reshma
+
+
+DELIMITER //
+
+CREATE PROCEDURE add_employee_new(
+    IN p_id INT,
+    IN p_name VARCHAR(50)
+)
+BEGIN
+    INSERT INTO Employees (emp_id, name)
+    VALUES (p_id, p_name);
+END //
+
+DELIMITER ;
+
+CALL add_employee_new(18, 'Reshma');
+
+----------------------------------------------------------
+2. UPDATE PROCEDURE
+----------------------------------------------------------
+
+Create a stored procedure named update_salary to update an employee’s salary in the Employees table.
+
+Task
+Assume an Employees table exists with columns:
+emp_id
+name
+salary
+Write a stored procedure that:
+Accepts employee ID and new salary as input parameters.
+Updates the salary of the specified employee.
+Execute the procedure to:
+Update salary of employee ID = 1
+Set salary to 60000
+
+
+
+DELIMITER //
+
+CREATE PROCEDURE update_salary(
+IN p_id INT,
+IN p_salary INT
+)
+BEGIN
+UPDATE Employees
+SET salary = p_salary
+WHERE emp_id = p_id;
+END //
+
+DELIMITER ;
+
+CALL update_salary(1, 60000);
+
+
+----------------------------------------------------------
+2. UPDATE PROCEDURE
+----------------------------------------------------------
+
+Create a stored procedure named update_department to modify an employee’s department in the 
+Employees table.
+
+Task
+Assume an Employees table exists with columns:
+emp_id
+name
+department
+salary
+Write a stored procedure that:
+Accepts employee ID and new department name as input parameters.
+Updates the department of the specified employee.
+Execute the procedure to:
+Change the department of employee ID = 2
+Set department as 'Finance'
+
+
+
+DELIMITER //
+
+CREATE PROCEDURE update_department(
+    IN p_id INT,
+    IN p_department VARCHAR(50)
+)
+BEGIN
+    UPDATE Employees
+    SET department = p_department
+    WHERE emp_id = p_id;
+END //
+
+DELIMITER ;
+
+CALL update_department(2, 'Finance');
+----------------------------------------------------------
+
+3. DELETE PROCEDURE
+
+----------------------------------------------------------
+Create a stored procedure named delete_employee to remove an employee record from the Employees table.
+
+Task
+Assume an Employees table exists containing:
+emp_id
+name
+department
+salary
+Write a stored procedure that:
+Accepts employee ID as an input parameter.
+Deletes the employee record matching the given ID.
+Call the procedure to:
+Delete the employee whose emp_id = 1.
+
+
+DELIMITER //
+
+CREATE PROCEDURE delete_employee(
+IN p_id INT
+)
+BEGIN
+DELETE FROM Employees
+WHERE emp_id = p_id;
+END //
+
+DELIMITER ;
+
+CALL delete_employee(1);
+
+----------------------------------------------------------
+NOTE:
+
+* INSERT procedure adds new records
+* UPDATE procedure modifies existing records
+* DELETE procedure removes records
+* Procedures are executed using CALL
+----------------------------------------------------------
+
+DROP PROCEDURE
+----------------------------------------------------------
+
+DROP PROCEDURE procedure_name;
+
+Example:
+DROP PROCEDURE get_employees;
+
+----------------------------------------------------------
+
+
+REAL-TIME EXAMPLE: BANK MONEY TRANSFER USING STORED PROCEDURE
+
+==================================================
+
+1. SCENARIO
+==================================================
+A user transfers money from one account to another.
+
+Instead of writing multiple SQL queries every time,
+we use a stored procedure.
+
+==================================================
+2. CREATE TABLE
+===============
+
+CREATE TABLE Accounts (
+acc_id INT PRIMARY KEY,
+name VARCHAR(50),
+balance INT
+);
+
+==================================================
+3. INSERT SAMPLE DATA
+=====================
+
+INSERT INTO Accounts VALUES
+(1, 'Ravi', 10000),
+(2, 'Anu', 8000);
+
+==================================================
+4. CREATE STORED PROCEDURE
+==========================
+
+DELIMITER //
+
+CREATE PROCEDURE transfer_money(
+IN from_acc INT,
+IN to_acc INT,
+IN amount INT
+)
+
+BEGIN
+UPDATE Accounts
+SET balance = balance - amount
+WHERE acc_id = from_acc;
+
+UPDATE Accounts
+SET balance = balance + amount
+WHERE acc_id = to_acc;
+
+END //
+
+DELIMITER ;
+
+==================================================
+5. CALL PROCEDURE
+=================
+
+CALL transfer_money(1, 2, 2000);
+
+==================================================
+6. CHECK RESULT
+===============
+
+SELECT * FROM Accounts;
+
+OUTPUT:
+acc_id | name | balance
+-----------------------
+
+1      | Ravi | 8000
+2      | Anu  | 10000
+
+==================================================
+7. WHAT HAPPENS INTERNALLY
+==========================
+
+* Amount is deducted from sender account
+* Amount is added to receiver account
+* Both operations happen using one procedure call
+
+==================================================
+8. REAL APPLICATION FLOW
+========================
+
+User → Click "Transfer Money"
+→ Application sends request
+→ Backend calls procedure
+→ Database updates balances
+
+==================================================
+
+ERROR HANDLING IN SQL-
+==================================================
+
+MySQL provides HANDLERS to control what happens when an error occurs inside:
+
+Stored Procedures
+Functions
+Triggers
+
+There are 2 handler types defined in SQL standard.
+
+CONTINUE HANDLER-    continue executing further lines after the error
+
+EXIT HANDLER - exit the procedure immediately when error happens
+
+
+SYNTAX FOR HANDLER-
+
+DECLARE handler_type HANDLER FOR condition action;
+
+some examples of condition-
+
+SQLSTATE'23000'(DUPLICATE KEY)
+SQLSTATE'42000'(SYNTAX ERROR)
+SQLEXCEPTION(ALL SQL ERRORS)
+NOTFOUND(no result in cursor)
+MYSQL_ERRNO 1062(duplicate key)
+
+Ex:DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+---------------------------------------------------------------------
+
+Simple CONTINUE Handler Example
+---------------------------------------------------------------------
+Used when you want to continue execution even after an error.
+
+
+Write a Stored Procedure named DemoContinue that performs the following:
+
+Declare a CONTINUE HANDLER for SQLEXCEPTION.
+When an error occurs, display the message:
+Error occurred — but continuing execution
+Inside the procedure:
+Try inserting a record with an existing emp_id to intentionally generate an error.
+Insert two more valid employee records.
+Display a final message:
+Procedure still running...
+
+
+CREATE TABLE employees (
+    emp_id INT PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+INSERT INTO employees VALUES (1,'sruthi');
+
+
+DELIMITER $$
+
+CREATE PROCEDURE DemoContinue()
+BEGIN
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    SELECT 'Error occurred — but continuing execution' AS msg;
+
+    INSERT INTO employees(emp_id, name)
+    VALUES (1, 'John');   -- duplicate ID → triggers error
+    INSERT INTO employees VALUES (2,'Geetha');
+    INSERT INTO employees VALUES (3,'Ravi');
+
+
+    SELECT 'Procedure still running...' AS status;
+END $$
+
+DELIMITER ;
+
+CALL DemoContinue();
+--------
+Internally (Execution Flow)
+
+INSERT INTO employees VALUES(1,'John');
+
+❌ Error occurs → Duplicate Primary Key
+
+Is handler available- YES → CONTINUE HANDLER
+
+INSERT INTO employees VALUES (2,'Geetha');
+
+---Row inserted successfully
+
+SELECT * FROM employees;
+
+---------------------------------------------------------------------
+EXIT Handler Example
+---------------------------------------------------------------------
+Used when you want to stop execution after an error.
+
+Write a stored procedure named DemoExitMultiple that demonstrates the working of an EXIT HANDLER.
+
+The procedure should:
+
+Declare an EXIT HANDLER for SQLEXCEPTION.
+When an error occurs, display the message:
+Error occurred — exiting procedure immediately
+Inside the procedure:
+Insert one valid employee record.
+Attempt to insert another employee with an already existing emp_id to intentionally generate a duplicate key error.
+Add two more INSERT statements after the error.
+Add a final SELECT statement displaying:
+Procedure Completed
+
+
+
+CREATE TABLE employees1 (
+    emp_id INT PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+INSERT INTO employees1 VALUES (1,'sruthi');
+
+
+DELIMITER $$;
+
+CREATE PROCEDURE DemoExitMultiple1()
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+SELECT 'Error occurred — exiting procedure immediately' AS msg;
+
+INSERT INTO employees1 VALUES (2,'Geetha');   -- SUCCESS
+INSERT INTO employees1 VALUES (1,'John');     -- ERROR (duplicate key)
+INSERT INTO employees1 VALUES (3,'Ravi');     -- WILL NOT RUN
+INSERT INTO employees1 VALUES (4,'Anu');      -- WILL NOT RUN
+
+SELECT 'Procedure Completed' AS status;
+
+END $$
+
+DELIMITER ;
+
+
+CALL DemoExitMultiple1();
+
+select * from employees1;
+
+
+ Internal Execution Flow 
+
+Procedure Start
+|
+v
+INSERT (2,'Geetha')  → SUCCESS ✅
+|
+v
+INSERT (1,'John')    → ERROR ❌ (duplicate PK)
+|
+v
+EXIT HANDLER ACTIVATES
+|
+v
+Print error message
+|
+v
+PROCEDURE STOPS IMMEDIATELY
+|
+X Remaining statements skipped
+
+---
+
+Output
+
++--------------------------------------------------+
+| msg                                              |
++--------------------------------------------------+
+| Error occurred — exiting procedure immediately   |
++--------------------------------------------------+
+
+NOTE:
+You will NOT see "Procedure Completed".
+
+
+---------------------------------------------------------------------
+
+Real-Time Example: OUT Parameter + Error Handling
+
+---------------------------------------------------------------------
+Used when applications need success/failure messages.
+
+
+Create a stored procedure named AddEmployee to insert a new employee into the employees table and 
+return the operation status.
+
+Task
+Assume an employees table exists with columns:
+emp_id
+name
+Write a stored procedure that:
+Accepts employee ID and employee name as IN parameters.
+Inserts the employee record into the table.
+Uses an OUT parameter to return the execution status:
+'SUCCESS' → if insertion is successful
+'FAILED – error occurred' → if any error happens (example: duplicate primary key).
+Implement error handling using an EXIT HANDLER for SQLEXCEPTION.
+Execute the procedure twice:
+First call → try inserting an existing employee ID.
+Second call → insert a new employee successfully.
+Display the returned status message after each call.
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE AddEmployee(
+    IN p_id INT,
+    IN p_name VARCHAR(50),
+    OUT p_status VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    SET p_status = 'FAILED – error occurred';
+
+    INSERT INTO employees1(emp_id, name)
+    VALUES (p_id, p_name);
+
+    SET p_status = 'SUCCESS';
+END $$
+
+DELIMITER ;
+
+Calling:
+CALL AddEmployee(1, 'Asha', @msg);
+SELECT @msg;
+
+CALL AddEmployee(10, 'Asha', @msg);
+SELECT @msg;
+
+
+---------------------------------------------------------------------
+Using SIGNAL to Display Custom Error Messages
+---------------------------------------------------------------------
+
+SIGNAL allows you to raise your own error 
+
+
+Create a stored procedure named CheckAge that validates a person's age before allowing further processing.
+
+Task
+Write a stored procedure that:
+Accepts age as an IN parameter.
+Checks whether the age is less than 18.
+If age is below 18:
+Raise a custom error message using SIGNAL.
+
+Display the message:
+
+Age must be 18 or above
+If age is 18 or greater:
+Return a message 'Valid age'.
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE CheckAge(IN p_age INT)
+BEGIN
+    IF p_age < 18 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Age must be 18 or above';
+    END IF;
+
+    SELECT 'Valid age' AS status;
+END $$
+
+DELIMITER ;
+
+
+Calling:
+
+CALL CheckAge(10);
+
+
+Produces:
+
+ERROR 1644 (45000): Age must be 18 or above
+
+
+✔ Error appears in red
+✔ Perfect for validation
+
+CALL CheckAge(20);
+
+---------------------------------------------------------------------
+Logging Errors Into a Table (Professional Pattern)
+---------------------------------------------------------------------
+Useful in real systems.
+
+Design a database solution to log errors into a separate table whenever an insert operation fails.
+
+Scenario
+
+In a real-time application, whenever inserting data into the Employees table fails (for example, duplicate primary key or constraint violation), the system should:
+
+✅ NOT crash
+✅ Capture the error
+✅ Store the error message into an Error Log table
+
+Task
+Create an Employees table with:
+Employee ID as Primary Key
+Employee Name
+Create an Error Log table to store:
+Auto-generated log ID
+Error message
+Timestamp of error occurrence
+Write a stored procedure named InsertWithLog1 that:
+Attempts to insert a record into the Employees table.
+Uses an EXIT HANDLER for SQLEXCEPTION.
+Logs an error message into the error log table if insertion fails.
+Execute the procedure multiple times to intentionally generate an error.
+Display the contents of the error log table.
+
+
+
+CREATE TABLE employees (
+    emp_id INT PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+CREATE TABLE error_log1 (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    error_message VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+Procedure:
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertWithLog1()
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    INSERT INTO error_log1(error_message)
+    VALUES ('Insert failed in employees table');
+
+    INSERT INTO employees(emp_id, name)
+    VALUES (1, 'Test');
+END $$
+
+DELIMITER ;
+
+
+CALL InsertWithLog1();
+
+✔ Error is stored in a log table
+✔ No crash
+
+SELECT * FROM error_log1;
+
+mysql> select * from error_log1;
++----+----------------------------------+---------------------+
+| id | error_message                    | created_at          |
++----+----------------------------------+---------------------+
+|  1 | Insert failed in employees table | 2026-04-30 14:31:33 |
+|  2 | Insert failed in employees table | 2026-04-30 14:31:36 |
++----+----------------------------------+---------------------+
+
+1st call → insert success → no log
+2nd call → duplicate error → log added
+3rd call → duplicate error → log added
+
+============================================================
+STORED PROCEDURE WITH ERROR LOGGING 
+====================================================
+
+## OBJECTIVE
+
+Insert employee data using a Stored Procedure.
+If any error occurs (duplicate key / SQL error),
+automatically store the error inside an error_log table.
+
+
+CREATE TABLE employees (
+emp_id INT PRIMARY KEY,
+name VARCHAR(50)
+);
+
+
+CREATE TABLE error_log (
+log_id INT AUTO_INCREMENT PRIMARY KEY,
+error_message VARCHAR(255),
+error_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertEmployee(
+IN p_id INT,
+IN p_name VARCHAR(50)
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+    INSERT INTO error_log(error_message)
+    VALUES ('Error occurred while inserting employee');
+END;
+
+INSERT INTO employees(emp_id, name)
+VALUES (p_id, p_name);
+
+END $$
+
+DELIMITER ;
+
+
+CALL InsertEmployee(2,'Ravi');
+
+Result:
+Employee inserted successfully.
+
+
+CALL InsertEmployee(1,'Anu');
+
+Explanation:
+emp_id = 1 already exists.
+Primary key violation occurs.
+
+---- CHECK ERROR LOG TABLE
+
+SELECT * FROM error_log;
+
++--------+-----------------------------------------+---------------------+
+| log_id | error_message                           | error_time          |
++--------+-----------------------------------------+---------------------+
+|      1 | Error occurred while inserting employee | 2026-04-30 14:55:57 |
++--------+-----------------------------------------+---------------------+
+1 row in set (0.00 sec)
+
+
+CALL InsertEmployee(2,'Kriti');
+
+
+---------------------------------------------------------------------
+Control Flow in Stored Procedures
+---------------------------------------------------------------------
+✔ IF – ELSE
+- to classify a person as Senior if age is greater than 30, otherwise classify as Junior.
+
+IF age > 30 THEN
+    SELECT 'Senior';
+ELSE
+    SELECT 'Junior';
+END IF;
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE CheckAge1(IN age INT)
+BEGIN
+
+    IF age > 30 THEN
+        SELECT 'Senior' AS Category;
+    ELSE
+        SELECT 'Junior' AS Category;
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+CALL CheckAge1(35);
+
+Output → Junior
+
+
+---------------------------------------------------------------------
+✔ CASE
+- determines the region based on the city name using CASE statement.
+CASE city
+    WHEN 'Delhi' THEN SELECT 'North';
+    WHEN 'Mumbai' THEN SELECT 'West';
+    ELSE SELECT 'Other region';
+END CASE;
+
+example : 
+DELIMITER $$
+
+CREATE PROCEDURE GetRegion(IN city VARCHAR(50))
+BEGIN
+
+    CASE city
+        WHEN 'Delhi' THEN
+            SELECT 'North' AS Region;
+        WHEN 'Mumbai' THEN
+            SELECT 'West' AS Region;
+        ELSE
+            SELECT 'Other region' AS Region;
+    END CASE;
+
+END $$
+
+DELIMITER ;
+
+CALL GetRegion('Delhi');
+---------------------------------------------------------------------
+✔ WHILE Loop
+-to insert numbers from 1 to 5 into a table named Logs using a WHILE loop
+
+syntax :WHILE condition DO
+    statements;
+END WHILE;
+
+
+SET x = 1;
+WHILE x <= 5 DO
+    INSERT INTO Logs VALUES (x);
+    SET x = x + 1;
+END WHILE;
+
+
+Example :
+CREATE TABLE Logs1 (
+    num INT
+);
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertLogs1()
+BEGIN
+
+    DECLARE x INT DEFAULT 1;
+
+    WHILE x <= 5 DO
+        INSERT INTO Logs1 VALUES (x);
+        SET x = x + 1;
+    END WHILE;
+
+END $$
+
+DELIMITER ;
+
+CALL InsertLogs1();
+---------------------------------------------------------------------
+✔ LOOP + LEAVE
+
+-- procedure that continuously increments a variable and exits the loop when the value becomes greater than 5 
+using LOOP and LEAVE.
+
+syntax :LOOP_LABEL: LOOP
+
+    statements;
+
+    IF condition THEN
+        LEAVE LOOP_LABEL;
+    END IF;
+
+END LOOP LOOP_LABEL;
+
+example:
+
+myloop: LOOP
+    SET x = x + 1;
+    IF x > 5 THEN
+        LEAVE myloop;
+    END IF;
+END LOOP myloop;
+
+Example :
+
+DELIMITER $$
+
+CREATE PROCEDURE LoopExample1()
+BEGIN
+
+    DECLARE x INT DEFAULT 0;
+
+    myloop: LOOP
+        SET x = x + 1;
+
+        IF x > 5 THEN
+            LEAVE myloop;
+        END IF;
+
+    END LOOP myloop;
+
+    SELECT x AS Final_Value;
+
+END $$
+
+DELIMITER ;
+
+CALL LoopExample1();
+---------------------------------------------------------------------
+✔ REPEAT Loop
+
+
+syntax :REPEAT
+
+    statements;
+
+UNTIL condition
+END REPEAT;
+
+
+--  procedure that increases a counter repeatedly until its value reaches 5 using a REPEAT loop.
+SET x = 1;
+REPEAT
+    SET x = x + 1;
+UNTIL x = 5
+END REPEAT;
+
+example :
+
+DELIMITER $$
+
+CREATE PROCEDURE RepeatExample()
+BEGIN
+
+    DECLARE x INT DEFAULT 1;
+
+    REPEAT
+        SET x = x + 1;
+    UNTIL x = 5
+    END REPEAT;
+
+    SELECT x AS Final_Value;
+
+END $$
+
+
+DELIMITER ;
+
+
+CALL RepeatExample();

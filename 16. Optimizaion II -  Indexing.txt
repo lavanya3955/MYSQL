@@ -1,0 +1,588 @@
+==========================================================
+INDEXING IN MYSQL
+==========================================================
+
+1. WHAT IS INDEXING?
+----------------------------------------------------------
+
+Indexing is a technique used to improve the speed of data retrieval in a table.
+
+An index is created on one or more columns of a table.
+
+Simple Definition:
+Indexing helps MySQL find data faster without scanning the entire table.
+
+Indexing improves query performance by allowing fast data retrieval without scanning the entire table.
+
+----------------------------------------------------------
+
+2. WHY INDEXING?
+----------------------------------------------------------
+
+Without Index:
+- MySQL scans all rows (Full Table Scan)
+- Slow performance for large data
+
+With Index:
+- MySQL directly finds required rows
+- Faster query execution
+
+----------------------------------------------------------
+
+3. REAL LIFE EXAMPLE
+----------------------------------------------------------
+
+Think of a Book:
+
+Without Index:
+- You read every page to find a topic
+
+With Index:
+- You go to index page → find page number → directly reach content
+
+Same in MySQL:
+Index helps locate data quickly.
+
+----------------------------------------------------------
+
+4. HOW INDEX WORKS
+----------------------------------------------------------
+
+- Index stores column values + pointer to actual row
+- Works like a sorted structure (similar to B-Tree)
+B-Tree (Balanced Tree) is a data structure used by databases to store and search data efficiently.
+It keeps data sorted and allows:
+
+Fast search
+Fast insert
+Fast delete
+
+- Speeds up SELECT queries
+
+----------------------------------------------------------
+
+5. ADVANTAGES OF INDEXING
+----------------------------------------------------------
+
+1. Faster Data Retrieval
+- Improves SELECT performance
+
+2. Efficient Searching
+- Helps in WHERE, JOIN, ORDER BY
+
+3. Reduces Full Table Scan
+- Saves time and resources
+
+4. Improves Sorting
+- Faster ORDER BY operations
+
+5. Better Query Performance
+- Especially for large tables
+
+----------------------------------------------------------
+
+6. DISADVANTAGES (IMPORTANT)
+----------------------------------------------------------
+
+1. Extra Storage Required
+- Index takes additional space
+
+2. Slower INSERT/UPDATE/DELETE
+- Index must also be updated
+
+3. Too Many Indexes = Bad Performance
+- Overhead increases
+
+----------------------------------------------------------
+
+CREATE TABLE & INSERT 1 LAKH RECORDS
+
+CREATE TABLE A (
+c1 INT
+);
+
+INSERT LARGE DATA 1,00,000 USING RECURSIVE CTE, 
+
+--
+Start with 1
+Then keep adding 1 again and again
+Until we reach 100000
+
+Like counting:
+1 → 2 → 3 → 4 → 5 → ... → 100000
+
+-----------------------------------------------------------------------------------------
+INSERT INTO A (c1)
+WITH RECURSIVE t AS (
+SELECT 1 AS n
+UNION ALL
+SELECT n + 1 FROM t WHERE n < 100000
+)
+SELECT n FROM t;
+
+
+Imagine:
+You are writing numbers in a notebook
+
+Manual way:
+Write 1, 2, 3, 4... till 100000 ❌ (very slow)
+
+Smart way:
+Tell a machine:
+"Start at 1 and keep writing until 100000" ✅
+
+That’s exactly what this query does
+
+-----------------------------------------------------------------------------------------
+MySQL has a limit for recursion so we can increase it so it can go till 100000
+
+Increase recursion limit:
+SET @@cte_max_recursion_depth = 1000000;
+-----------------------------------------------------------------------------------------
+
+Check data:
+SELECT COUNT(*) FROM A;
+
+select * from A limit 10;
+
+
+QUERY WITHOUT INDEX
+
+SELECT * FROM A WHERE c1 = 10;
+
+Observation: check in Both work bench (execute the explain command) & command line time taken to execute.
+
+* Full Table Scan happens
+* All rows are checked
+* Query cost is HIGH
+* Execution is slow
+
+Cost is an estimated value that tells the MySQL Optimizer how expensive it is to execute a query.
+
+The Cost you see in the EXPLAIN plan is not money.
+
+It is simply an estimated execution cost used internally by the MySQL optimizer.
+
+NOTE:If your company installs MySQL on its own server (on-premises or on a VM), you can run:
+
+10 queries
+10 million queries
+1 billion queries
+
+There is no per-query fee. The cost is for the infrastructure, such as:
+
+Server/VM
+Storage
+RAM
+CPU
+Network
+Database administrator (DBA) time
+
+-----------------------------------------------------------------------------------------
+
+CREATE INDEX
+
+CREATE INDEX a_c1_idx ON A(c1);
+
+
+QUERY WITH INDEX
+
+SELECT * FROM A WHERE c1 = 10;
+
+Observation:
+
+* Index lookup is used
+* No full table scan
+* Cost is LOW
+* Execution is fast (milliseconds)
+
+-----------------------------------------------------------------------------------------
+HOW INDEX WORKS INTERNALLY
+
+Index uses B-Tree structure:
+
+Root → Branch → Leaf
+
+* Root & Branch = Navigation/directions
+* Leaf = Actual data location
+
+Example:
+100,000 rows divided into blocks, consider in 100 blocks it is stored , so each block contains 1lakh/100 = 1000.
+So each block holds 1000 rows.
+
+Without index:
+
+* Scans all blocks
+
+With index:
+
+* Directly jumps to correct block
+* Faster retrieval
+
+What Happens Internally (B-Tree)
+
+Index is stored like a tree:
+
+        Root
+      /   |   \
+   1-1000 1001-2000 2001-3000 ...
+
+🔍 Example: Searching for value = 55000
+
+Step 1: Check ROOT
+Root contains ranges:
+1–10000
+10001–50000
+50001–100000
+
+👉 55000 falls in → 50001–100000
+
+Step 2: Go to that branch
+Further divided:
+50001–60000
+60001–70000
+
+👉 55000 falls in → 50001–60000
+
+Step 3: Go to LEAF (block)
+
+👉 Now MySQL knows:
+✔ Data is in this specific block
+
+It goes to that block (disk page)
+Reads only that block
+Finds the exact row
+-----------------------------------------------------------------------------------------
+Imagine:
+
+You have a book with 100 pages
+Each page has 1,000 names
+You want to find "Ravi"
+❌ Without index:
+You check page 1… page 2… page 3… 😓
+Slow (Full scan)
+✅ With index:
+First page (index page) says:
+A–D → Page 1
+E–H → Page 2
+I–M → Page 3
+N–R → Page 4
+
+You directly go to Page 4
+Work reduced!
+
+-----------------------------------------------------------------------------------------
+
+Note:Index does NOT store full data
+It stores:
+Value (c1)
+Pointer (address of block)
+
+So MySQL:
+
+Uses index → finds block address
+Goes to block → fetches data
+-----------------------------------------------------------------------------------------
+WHEN TO CREATE INDEX
+-----------------------------------------------------------------------------------------
+
+Create index on:
+
+* Columns used in WHERE clause
+* Columns used in JOIN
+* Frequently searched columns
+-----------------------------------------------------------------------------------------
+
+WHEN NOT TO CREATE INDEX
+-----------------------------------------------------------------------------------------
+
+Avoid index on:
+
+* Columns with frequent INSERT/UPDATE/DELETE
+* Columns rarely used in queries
+
+Reason:
+
+* Index must be updated for every change
+* Slows down DML operations
+
+-----------------------------------------------------------------------------------------
+TYPES OF INDEXES
+-----------------------------------------------------------------------------------------
+
+A Single table can have multiple indexes, and they can be:
+
+Normal Index (Non-Unique)
+Unique Index
+Primary Key Index
+Composite Index
+
+1. NORMAL INDEX
+   CREATE INDEX a_c1_idx ON A(c1);
+
+* Allows duplicate values
+INSERT INTO A VALUES (10);
+alter table A drop INDEX a_c1_idx;
+delete from A where c1=10;
+-----------------------------------------------------------------------------------------
+
+2. UNIQUE INDEX
+   CREATE UNIQUE INDEX a_c1_idx ON A(c1);
+
+* No duplicate values allowed
+
+Example:
+INSERT INTO A VALUES (10);
+INSERT INTO A VALUES (10); → ERROR
+
+PRIMARY KEY constraint → automatically creates a UNIQUE index.
+UNIQUE constraint → automatically creates a UNIQUE index.
+
+PRIMARY KEY INDEX
+   CREATE TABLE B (
+   c2 INT,
+   c3 INT,
+   PRIMARY KEY (c2)
+   );
+
+* Automatically creates index
+
+-- CHECK INDEXES
+
+SHOW INDEX FROM A;
+SHOW INDEX FROM B;
+
+CREATE TABLE C (
+   c2 INT,
+   c3 INT,
+   Unique KEY (c2)
+   );
+
+SHOW INDEX FROM C;
+
+
+INDEX EXAMPLES IN MYSQL 
+
+==================================================
+
+1. NORMAL INDEX (SINGLE COLUMN)
+   ==================================================
+
+## STEP 1: CREATE TABLE
+
+CREATE TABLE Employees (
+emp_id INT,
+name VARCHAR(50),
+salary INT
+);
+
+## STEP 2: INSERT SAMPLE DATA
+
+INSERT INTO Employees VALUES
+(1, 'Ravi', 50000),
+(2, 'Anu', 60000),
+(3, 'Kiran', 50000),
+(4, 'Meena', 70000),
+(5, 'Rahul', 60000);
+
+## STEP 3: QUERY WITHOUT INDEX
+
+SELECT * FROM Employees WHERE salary = 60000;
+
+Observation:
+
+* Full table scan happens
+* All rows are checked
+* Slower for large data
+
+## STEP 4: CREATE INDEX
+
+CREATE INDEX idx_salary ON Employees(salary);
+
+## STEP 5: QUERY WITH INDEX
+
+SELECT * FROM Employees WHERE salary = 60000;
+
+Observation:
+
+* Index is used
+* Faster data retrieval
+
+## KEY POINTS
+
+* Normal index allows duplicate values
+* Improves SELECT performance
+* Does not enforce uniqueness
+
+==================================================
+2. MULTI-COLUMN INDEX (COMPOSITE INDEX)
+=======================================
+
+## STEP 1: CREATE TABLE
+
+CREATE TABLE Employees2 (
+emp_id INT,
+name VARCHAR(50),
+department VARCHAR(50),
+salary INT
+);
+
+## STEP 2: INSERT SAMPLE DATA
+
+INSERT INTO Employees2 VALUES
+(1, 'Ravi', 'IT', 50000),
+(2, 'Anu', 'HR', 60000),
+(3, 'Kiran', 'IT', 50000),
+(4, 'Meena', 'HR', 70000),
+(5, 'Rahul', 'IT', 60000);
+
+## STEP 3: CREATE COMPOSITE INDEX
+
+CREATE INDEX idx_dept_salary
+ON Employees2(department, salary);
+
+## STEP 4: QUERY USING INDEX
+
+SELECT * FROM Employees2
+WHERE department = 'IT' AND salary = 50000;
+
+## IMPORTANT RULE
+
+Index works based on column order:
+
+(department, salary)
+
+Works efficiently:
+
+* WHERE department = 'IT'
+* WHERE department = 'IT' AND salary = 50000
+
+Not efficient:
+
+* WHERE salary = 50000 (alone)
+
+Composite index follows Left-to-Right rule
+Composite index works only if the first column (left-most column) is used in the query.
+
+-----------------------------------------------------------------------------------------
+CLUSTERED INDEX
+-----------------------------------------------------------------------------------------
+
+Definition:
+Clustered index determines the physical order of data in the table.
+
+Key Points:
+- Data is stored in sorted order
+- Only ONE clustered index per table
+- Usually created on PRIMARY KEY
+
+----------------------------------------------------------
+
+Example:
+
+CREATE TABLE Students (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    marks INT
+);
+
+INSERT INTO Students VALUES
+(3, 'Ravi', 80),
+(1, 'Anu', 90),
+(2, 'Kiran', 85);
+
+Data is physically stored in order of PRIMARY KEY (id)
+
+select * from Students;
++----+-------+-------+
+| id | name  | marks |
++----+-------+-------+
+|  1 | Anu   |    90 |
+|  2 | Kiran |    85 |
+|  3 | Ravi  |    80 |
++----+-------+-------+
+
+Explanation:
+- Table data is physically stored in order of 'id'
+- 'id' acts as clustered index
+
+Only ONE clustered index per table
+PRIMARY KEY is clustered index in MySQL
+Data is stored physically in index order
+
+----------------------------------------------------------
+
+NON-CLUSTERED INDEX
+----------------------------------------------------------
+
+Definition:
+Non-clustered index is a separate structure that stores column values and pointers to actual data.
+
+Key Points:
+- Data is NOT stored in order
+- Multiple non-clustered indexes allowed
+- Works like a lookup table
+----------------------------------------------------------
+NON-CLUSTERED INDEX EXAMPLE
+
+## STEP 1: CREATE TABLE
+
+CREATE TABLE Employees (
+emp_id INT PRIMARY KEY,
+name VARCHAR(50),
+salary INT
+);
+
+----------------------------------------------------------
+
+## STEP 2: INSERT DATA
+
+INSERT INTO Employees VALUES
+(1, 'Ravi', 50000),
+(2, 'Anu', 60000),
+(3, 'Kiran', 50000),
+(4, 'Meena', 70000);
+
+----------------------------------------------------------
+
+## STEP 3: CREATE NON-CLUSTERED INDEX
+
+CREATE INDEX idx_salary ON Employees(salary);
+
+show indexes from employees;
+
+mysql> select * from employees;
++--------+-------+--------+
+| emp_id | name  | salary |
++--------+-------+--------+
+|      1 | Ravi  |  50000 |
+|      2 | Anu   |  60000 |
+|      3 | Kiran |  50000 |
+|      4 | Meena |  70000 |
++--------+-------+--------+
+
+## WHAT HAPPENS INTERNALLY
+
+* Data is stored based on PRIMARY KEY (emp_id)
+* Index is stored separately
+
+Index looks like:
+salary → pointer to row
+
+Example:
+50000 → (emp_id 1, emp_id 3)
+60000 → (emp_id 2)
+
+----------------------------------------------------------
+## STEP 4: QUERY
+
+SELECT * FROM Employees WHERE salary = 50000;
+
+----------------------------------------------------------
+
+## OBSERVATION
+
+* MySQL first checks index
+* Gets emp_id values
+* Then fetches actual rows using PRIMARY KEY
+

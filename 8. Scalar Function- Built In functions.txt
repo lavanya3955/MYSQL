@@ -1,0 +1,1017 @@
+--------------------------------------------------------------------------------------
+BUILT IN FUNCTIONS
+--------------------------------------------------------------------------------------
+
+Built-in functions in MySQL are predefined functions used to perform operations 
+on strings, numbers, dates, and conditions easily.
+
+You can directly use them in queries to perform operations on data without writing your own logic.
+
+Built-in functions = ready-made functions provided by MySQL to perform common tasks like calculations, 
+formatting, string operations, etc.
+
+1. String Functions (work on text)
+UPPER() → converts text to uppercase
+LOWER() → converts text to lowercase
+LENGTH() → returns length of string
+CONCAT() → joins multiple strings
+SUBSTRING() → extracts part of a string
+TRIM() → removes leading and trailing spaces
+REPLACE() → replaces part of a string
+INSTR() → finds position of a substring
+
+2. Numeric Functions (work on numbers)
+ABS() → returns absolute (positive) value
+ROUND() → rounds a number to nearest value
+CEIL() / CEILING() → rounds number up
+FLOOR() → rounds number down
+MOD() → returns remainder (modulus)
+POWER() → raises number to a power
+SQRT() → returns square root
+
+3. Date & Time Functions
+NOW() → returns current date and time
+CURDATE() → returns current date
+CURTIME() → returns current time
+DATE() → extracts date from datetime
+TIME() → extracts time from datetime
+YEAR() → extracts year
+MONTH() → extracts month
+DAY() → extracts day
+DATEDIFF() → difference between two dates
+DATE_ADD() → Adds a specified time interval to a date and returns the new date.
+DATE_SUB() → Subtracts a specified time interval from a date and returns the new date.
+
+4. Control Flow Functions
+IF(condition, value1, value2) → returns value1 if condition is true, else value2
+CASE → handles multiple conditions (like switch/if-else ladder)
+IFNULL(expr, value) → returns value if expr is NULL
+NULLIF(expr1, expr2) → returns NULL if both expressions are equal
+COALESCE() → returns first non-NULL value
+
+5.Conversion Function
+CAST() -used to change a value from one data type to another.
+
+we have many more like trignometry, logarithm functions.. 
+
+NOTE:
+
+The above scalar functions: 
+:shows output temporarily
+It does NOT create any new table
+
+MySQL reads data from Employees
+Applies TRIM(name)
+Displays result like a virtual table (temporary result)
+
+To change the original table → use UPDATE
+
+UPDATE Employees
+SET name = TRIM(name);
+
+--------------------------------------------------------------------------------------------------------
+1. String Functions
+--------------------------------------------------------------------------------------------------------
+
+Step 1: Create Table
+
+CREATE TABLE Employees (
+    id INT,
+    name VARCHAR(50),
+    city VARCHAR(50)
+);
+
+-- Step 2: Insert Data
+
+INSERT INTO Employees VALUES
+(1, 'ravi', 'bangalore'),
+(2, 'ANU', 'CHENNAI'),
+(3, '  Kiran  ', 'hyderabad'),
+(4, 'Meena', 'Delhi');
+
+-- 🔹 View Table
+
+SELECT * FROM Employees;
+
+✅ Output
++----+-----------+-----------+
+| id | name      | city      |
++----+-----------+-----------+
+| 1  | ravi      | bangalore |
+| 2  | ANU       | CHENNAI   |
+| 3  |   Kiran   | hyderabad |
+| 4  | Meena     | Delhi     |
++----+-----------+-----------+
+
+
+
+
+----------------------------------------------------------------------------------
+🔹 1. UPPER()
+--------------------------------------------------------------------------------------------------------
+❓ Q1: Convert names to uppercase
+
+SELECT name, UPPER(name) FROM Employees;
+
+✅ Output
+ravi      → RAVI  
+ANU       → ANU  
+  Kiran   →   KIRAN  
+Meena     → MEENA  
+
+--------------------------------------------------------------------------------------------------------
+🔹 2. LOWER()
+--------------------------------------------------------------------------------------------------------
+❓ Q2: Convert city to lowercase
+
+SELECT city, LOWER(city) FROM Employees;
+
+✅ Output
+bangalore → bangalore  
+CHENNAI   → chennai  
+hyderabad → hyderabad  
+Delhi     → delhi  
+
+--------------------------------------------------------------------------------------------------------
+🔹 3. LENGTH()
+--------------------------------------------------------------------------------------------------------
+❓ Q3: Find length of names
+
+SELECT name, LENGTH(name) FROM Employees;
+
+✅ Output
+ravi      → 4  
+ANU       → 3  
+  Kiran   → 9   (spaces included) ⚠️  
+Meena     → 5  
+
+--------------------------------------------------------------------------------------------------------
+🔹 4. CONCAT()
+--------------------------------------------------------------------------------------------------------
+❓ Q4: Combine name and city
+
+SELECT CONCAT(name, ' lives in ', city) FROM Employees;
+
+✅ Output
+ravi lives in bangalore  
+ANU lives in CHENNAI  
+  Kiran   lives in hyderabad  
+Meena lives in Delhi 
+ 
+--------------------------------------------------------------------------------------------------------
+🔹 5. SUBSTRING()
+--------------------------------------------------------------------------------------------------------
+
+SUBSTRING(column_name, start_position, length)
+
+
+❓ Q5: Extract first 3 letters of name
+
+Note:string indexing starts from 1
+
+SELECT name, SUBSTRING(name, 1, 3) FROM Employees;
+
+✅ Output
+ravi      → rav  
+ANU       → ANU  
+  Kiran   →   K  (includes spaces)  
+Meena     → Mee  
+
+Extract last 3 letters of name
+
+SELECT name, SUBSTRING(name, -3) AS Last_3_Letters
+FROM Employees;
+
+
+Extract 3 characters from the end of each employee's name.
+
+SELECT name, SUBSTRING(name, -3, 3) AS Last_3_Letters
+FROM Employees;
+
+
+Extract 3 characters starting from the last character of 'ravi'.
+
+SELECT SUBSTRING('ravi', -1, 3);
+
+String:      r   a   v   i
++ Position:  1   2   3   4
+- Position: -4  -3  -2  -1
+                          ↑
+                      Start here (-1)
+
+-1 → Start at i (the last character).
+3 → Try to return 3 characters.
+
+But after i, there are no more characters.
+
+Since you're already at the last character, 
+MySQL can only return one character (there are no more characters after it).
+
+--------------------------------------------------------------------------------------------------------
+🔹 6. TRIM()
+--------------------------------------------------------------------------------------------------------
+❓ Q6: Remove spaces from name
+
+SELECT name, TRIM(name) FROM Employees;
+
+✅ Output
+"  Kiran  " → "Kiran"
+
+--------------------------------------------------------------------------------------------------------
+🔹 7. REPLACE()
+--------------------------------------------------------------------------------------------------------
+
+❓ Q7: Replace 'a' with '*'
+
+SELECT name, REPLACE(name, 'a', '*') FROM Employees;
+
+✅ Output
+ravi   → r*vi  
+ANU    → ANU  
+Kiran  → Kir*n  
+Meena  → Meen*  
+
+Replace  - case sensitive
+
+--------------------------------------------------------------------------------------------------------
+🔹 8. INSTR()
+--------------------------------------------------------------------------------------------------------
+
+❓ Q8: Find position of 'a' in name
+
+SELECT name, INSTR(name, 'a') FROM Employees;
+
+✅ Output
+ravi   → 2  
+ANU    → 0 (not found)  
+Kiran  → 4  
+Meena  → 5  
+
+--------------------------------------------------------------------------------------------------------
+
+2. Numeric Functions
+--------------------------------------------------------------------------------------------------------
+
+Step 1: Create Table
+
+CREATE TABLE Numbers (
+    id INT,
+    value DECIMAL(10,2)
+);
+
+🔹 Step 2: Insert Data
+
+INSERT INTO Numbers VALUES
+(1, -10.5),
+(2, 4.7),
+(3, 9),
+(4, 2.3),
+(5, -3);
+
+🔹 View Table
+
+SELECT * FROM Numbers;
+
+✅ Output
++----+--------+
+| id | value  |
++----+--------+
+| 1  | -10.5  |
+| 2  | 4.7    |
+| 3  | 9.0    |
+| 4  | 2.3    |
+| 5  | -3.0   |
++----+--------+
+
+--------------------------------------------------------------------------------------------------------
+🔹 1. ABS()
+--------------------------------------------------------------------------------------------------------
+
+❓ Q1: Convert all values to positive
+
+SELECT value, ABS(value) FROM Numbers;
+
+✅ Output
+-10.5 → 10.5  
+4.7   → 4.7  
+9     → 9  
+2.3   → 2.3  
+-3    → 3  
+--------------------------------------------------------------------------------------------------------
+
+🔹 2. ROUND()
+--------------------------------------------------------------------------------------------------------
+
+❓ Q2: Round values
+
+SELECT value, ROUND(value) FROM Numbers;
+
+✅ Output
+-10.5 → -11  
+4.7   → 5  
+9     → 9  
+2.3   → 2  
+-3    → -3  
+
+ROUND goes “away from 0”
+
+<---- -12 ---- -11 ---- -10 ---- 0 ---->
+Moving away from 0 on negative side → go left
+So from -10.5 → go to -11
+
+
+❓ Q3: Round to 1 decimal place
+
+SELECT value, ROUND(value, 1) FROM Numbers;
+--------------------------------------------------------------------------------------------------------
+🔹 3. CEIL() / CEILING()
+--------------------------------------------------------------------------------------------------------
+
+❓ Q4: Round up values -- Round UP to the nearest integer
+
+SELECT value, CEIL(value) FROM Numbers;
+
+✅ Output
+-10.5 → -10  
+4.7   → 5  
+2.3   → 3  
+
+-10 → closer to 0
+-11 → farther from 0
+--------------------------------------------------------------------------------------------------------
+🔹 4. FLOOR()
+--------------------------------------------------------------------------------------------------------
+❓ Q5: Round down values --- Round down to the nearest integer
+
+SELECT value, FLOOR(value) FROM Numbers;
+
+✅ Output
+-10.5 → -11  
+4.7   → 4  
+2.3   → 2  
+
+--------------------------------------------------------------------------------------------------------
+🔹 5. MOD()
+--------------------------------------------------------------------------------------------------------
+❓ Q6: Find remainder
+
+SELECT MOD(10, 3);
+
+✅ Output
+1
+
+❓ Q7: Using table values
+
+SELECT value, MOD(value, 2) FROM Numbers;
+
+✅ Output
+4.7 → 0.7  
+9   → 1  
+2.3 → 0.3  
+
+4.7 ÷ 2 =2.35
+4.7 ÷ 2 = 2 (whole part) + remainder
+take the whole part & multiply by 2
+2 × 2 = 4
+Now subtract:
+4.7-4=0.7
+
+--------------------------------------------------------------------------------------------------------
+🔹 6. POWER()
+--------------------------------------------------------------------------------------------------------
+
+❓ Q8: Square values
+
+SELECT value, POWER(value, 4) FROM Numbers;
+
+✅ Output
+-10.5 → 110.25  
+4.7   → 22.09  
+9     → 81  
+--------------------------------------------------------------------------------------------------------
+🔹 7. SQRT()
+
+--------------------------------------------------------------------------------------------------------
+
+❓ Q9: Square root
+
+SELECT value, SQRT(value) FROM Numbers;
+
+✅ Output
+9   → 3  
+4.7 → 2.16 (approx)  
+-10.5 → NULL ⚠️
+
+👉 Negative numbers → NULL
+
+
+--------------------------------------------------------------------------------------------------------
+3. Date & Time Functions
+--------------------------------------------------------------------------------------------------------
+
+Step 1: Create Table
+CREATE TABLE Orders (
+    order_id INT,
+    order_datetime DATETIME
+);
+🔹 Step 2: Insert Data
+INSERT INTO Orders VALUES
+(1, '2024-01-10 10:30:00'),
+(2, '2024-02-15 14:45:00'),
+(3, '2024-03-20 09:15:00');
+
+🔹 View Table
+
+SELECT * FROM Orders;
+
+✅ Output
++----------+---------------------+
+| order_id | order_datetime      |
++----------+---------------------+
+| 1        | 2024-01-10 10:30:00 |
+| 2        | 2024-02-15 14:45:00 |
+| 3        | 2024-03-20 09:15:00 |
++----------+---------------------+
+
+--------------------------------------------------------------------------------------------------------
+🔹 1. NOW()
+--------------------------------------------------------------------------------------------------------
+❓ Q1: Get current date & time
+
+SELECT NOW();
+
+✅ Output (example)
+2026-04-04 12:30:45
+--------------------------------------------------------------------------------------------------------
+🔹 2. CURDATE()
+--------------------------------------------------------------------------------------------------------
+❓ Q2: Get current date
+
+SELECT CURDATE();
+
+✅ Output
+2026-04-04
+--------------------------------------------------------------------------------------------------------
+🔹 3. CURTIME()
+--------------------------------------------------------------------------------------------------------
+❓ Q3: Get current time
+
+SELECT CURTIME();
+
+✅ Output
+12:30:45
+
+--------------------------------------------------------------------------------------------------------
+🔹 4. DATE()
+--------------------------------------------------------------------------------------------------------
+❓ Q4: Extract date
+
+SELECT order_datetime, DATE(order_datetime) FROM Orders;
+
+✅ Output
+2024-01-10 10:30:00 → 2024-01-10
+2024-02-15 14:45:00 → 2024-02-15
+--------------------------------------------------------------------------------------------------------
+🔹 5. TIME()
+--------------------------------------------------------------------------------------------------------
+❓ Q5: Extract time
+
+SELECT order_datetime, TIME(order_datetime) FROM Orders;
+
+✅ Output
+2024-01-10 10:30:00 → 10:30:00
+2024-02-15 14:45:00 → 14:45:00
+
+--------------------------------------------------------------------------------------------------------
+🔹 6. YEAR(), MONTH(), DAY()
+--------------------------------------------------------------------------------------------------------
+❓ Q6: Extract year, month, day
+
+SELECT 
+order_datetime,
+YEAR(order_datetime),
+MONTH(order_datetime),
+DAY(order_datetime)
+FROM Orders;
+
+✅ Output
+2024-01-10 → 2024 | 1 | 10
+2024-02-15 → 2024 | 2 | 15
+2024-03-20 → 2024 | 3 | 20
+
+--------------------------------------------------------------------------------------------------------
+🔹 7. DATEDIFF()
+--------------------------------------------------------------------------------------------------------
+❓ Q7: Difference between two dates
+
+SELECT DATEDIFF('2024-02-15', '2024-01-10');
+
+✅ Output
+36
+
+--------------------------------------------------------------------------------------------------------
+🔹 8. DATE_ADD()
+--------------------------------------------------------------------------------------------------------
+❓ Q8: Add 5 days
+
+SELECT DATE_ADD('2024-01-10', INTERVAL 5 DAY);
+
+✅ Output
+2024-01-15
+
+❓ Q9: Add 1 month
+
+SELECT DATE_ADD('2024-01-10', INTERVAL 1 MONTH);
+
+✅ Output
+2024-02-10
+
+
+SELECT order_id,
+       order_datetime,
+       DATE_ADD(order_datetime, INTERVAL 5 DAY) AS new_date
+FROM Orders;
+
+SELECT order_id,
+       order_datetime,
+       DATE_ADD(order_datetime, INTERVAL 2 Month) AS new_date
+FROM Orders;
+--------------------------------------------------------------------------------------------------------
+🔹 9. DATE_SUB()
+--------------------------------------------------------------------------------------------------------
+❓ Q10: Subtract 7 days
+
+SELECT DATE_SUB('2024-01-10', INTERVAL 7 DAY);
+
+✅ Output
+2024-01-03
+
+--------------------------------------------------------------------------------------------------------
+❓ Q11: Subtract 1 month
+--------------------------------------------------------------------------------------------------------
+
+SELECT DATE_SUB('2024-03-20', INTERVAL 1 MONTH);
+
+✅ Output
+2024-02-20
+
+SELECT order_id,
+       order_datetime,
+       DATE_sub(order_datetime, INTERVAL 5 DAY) AS new_date
+FROM Orders;
+
+--------------------------------------------------------------------------------------------------------
+4. Control Flow Functions
+--------------------------------------------------------------------------------------------------------
+Step 1: Create Table
+CREATE TABLE Employees (
+    id INT,
+    name VARCHAR(50),
+    salary INT,
+    bonus INT
+);
+🔹 Step 2: Insert Data
+
+INSERT INTO Employees VALUES
+(1, 'Ravi', 30000, 5000),
+(2, 'Anu', 40000, NULL),
+(3, 'Kiran', 25000, 3000),
+(4, 'Meena', 20000, NULL);
+
+🔹 View Table
+
+SELECT * FROM Employees;
+
+✅ Output
+1 Ravi  30000 5000  
+2 Anu   40000 NULL  
+3 Kiran 25000 3000  
+4 Meena 20000 NULL  
+
+--------------------------------------------------------------------------------------------------------
+🔹 1. IF()
+--------------------------------------------------------------------------------------------------------
+
+👉 Works like simple IF-ELSE
+
+IF(condition, value1, value2)
+
+If condition = TRUE → returns value1
+If condition = FALSE → returns value2
+
+❓ Q1: Check if salary > 30000
+
+SELECT name, salary,
+IF(salary > 30000, 'High', 'Low') AS salary_status
+FROM Employees;
+
+✅ Output
+Ravi  → Low  
+Anu   → High  
+Kiran → Low  
+Meena → Low  
+
+--------------------------------------------------------------------------------------------------------
+🔹 2. CASE
+--------------------------------------------------------------------------------------------------------
+👉 Multiple conditions (like if-else ladder)
+
+syntax:
+CASE 
+    WHEN value1 THEN result1
+    WHEN value2 THEN result2
+    ELSE result
+END
+
+
+Categorize salary:
+
+SELECT name, salary,
+CASE
+    WHEN salary >= 40000 THEN 'Very High'
+    WHEN salary >= 30000 THEN 'High'
+    ELSE 'Low'
+END AS category
+FROM Employees;
+
+✅ Output
+Ravi  → High  
+Anu   → Very High  
+Kiran → Low  
+Meena → Low  
+
+--------------------------------------------------------------------------------------------------------
+🔹 3. IFNULL()
+--------------------------------------------------------------------------------------------------------
+
+Replace NULL values
+
+Show bonus, replace NULL with 0
+
+SELECT name, IFNULL(bonus, 0) FROM Employees;
+
+✅ Output
+Ravi  → 5000  
+Anu   → 0  
+Kiran → 3000  
+Meena → 0  
+
+--------------------------------------------------------------------------------------------------------
+🔹 4. NULLIF()
+--------------------------------------------------------------------------------------------------------
+
+NULLIF() is a MySQL function used to compare two values.
+
+If both values are equal → it returns NULL
+If values are different → it returns the first value
+
+
+Compare salary and bonus
+
+SELECT name, NULLIF(salary, bonus) FROM Employees;
+
+✅ Output
+Ravi  → 30000  
+Anu   → 40000  
+Kiran → 25000  
+Meena → 20000  
+
+(No match → original value returned)
+
+Example: where values match in 2 columns;
+
+INSERT INTO Employees VALUES
+(5, 'Ravi', 30000, 30000);
+
+
+INSERT INTO Employees VALUES
+(5, 'Ravi', NULL, NULL);
+
+SELECT NULLIF(salary, bonus) FROM Employees;
+
+✅ Output
+NULL
+
+
+-- Create Table
+
+CREATE TABLE Employees1 (
+    employee_name VARCHAR(50),
+    previous_salary INT,
+    current_salary INT
+);
+
+-- Insert Data
+
+INSERT INTO Employees1 VALUES
+('Ravi', 50000, 50000),
+('Anu', 40000, 45000),
+('Kiran', 35000, 35000),
+('Meena', 30000, 38000);
+
+-- View Table
+
+SELECT * FROM Employees1;
+
+-- Using NULLIF()
+
+SELECT employee_name,
+       NULLIF(current_salary, previous_salary) AS salary_change
+FROM Employees1;
+
+
+--------------------------------------------------------------------------------------------------------
+🔹 5. COALESCE()
+--------------------------------------------------------------------------------------------------------
+👉 Returns first NON-NULL value from a list
+
+It checks from left → right
+
+ex1: SELECT COALESCE(NULL, NULL, 5, 10);
+
+Write a SQL query to:
+
+Display employee name and bonus
+If the bonus is NULL, replace it with 1000
+If the bonus is not NULL, display the original bonus
+
+
+SELECT name, COALESCE(bonus, 1000) FROM Employees;
+
+✅ Output
+Ravi  → 5000  
+Anu   → 1000  
+Kiran → 3000  
+Meena → 1000  
+
+If bonus is NOT NULL → return bonus
+If bonus is NULL → return 1000
+
+Ex: CREATE TABLE Customers (
+    name VARCHAR(50),
+    phone VARCHAR(15),
+    email VARCHAR(50)
+);
+
+INSERT INTO Customers (name, phone, email) VALUES
+('Ravi', NULL, 'ravi@gmail.com'),
+('Anu', '9876543210', NULL),
+('John', NULL, NULL);
+
+
+| name | phone      | email                                   |
+| ---- | ---------- | --------------------------------------- |
+| Ravi | NULL       | [ravi@gmail.com](mailto:ravi@gmail.com) |
+| Anu  | 9876543210 | NULL                                    |
+| John | NULL       | NULL                                    |
+
+
+
+SELECT name, COALESCE(phone, email, 'No Contact') AS contact
+FROM Customers;
+
+| name | contact                                 |
+| ---- | --------------------------------------- |
+| Ravi | [ravi@gmail.com](mailto:ravi@gmail.com) |
+| Anu  | 9876543210                              |
+| John | No Contact                              |
+
+
+
+Multiple values
+
+SELECT COALESCE(NULL, NULL, 500, 1000);
+
+✅ Output
+500
+
+--------------------------------------------------------------------------------------------------------
+5.Conversion Function
+--------------------------------------------------------------------------------------------------------
+
+What is CAST()?
+
+👉 CAST() is used to convert a value from one data type to another. 
+CAST() is used to convert values during a query, not to permanently change the column datatype.
+
+
+to permanently change-- 
+ALTER TABLE Employees
+MODIFY COLUMN salary DECIMAL(10,2);
+
+CAST() is very useful when the stored datatype is not suitable for the operation you want to perform,
+but you don't want to permanently change the table structure.
+
+🔹 Syntax
+CAST(expression AS datatype)
+=-----------------------------------------------------------------------------
+🔹 Step 1: Create Table
+
+CREATE TABLE Sales (
+    id INT,
+    amount VARCHAR(20)
+);
+
+-- 🔹 Step 2: Insert Data
+
+INSERT INTO Sales VALUES
+(1, '100'),
+(2, '200'),
+(3, '300');
+
+SELECT * FROM Sales;
+
+✅ Output
+1  100  
+2  200  
+3  300  
+
+MySQL does not recognize INT, varchar inside CAST
+It expects types like:
+SIGNED
+UNSIGNED
+DECIMAL
+CHAR
+DATE, etc.
+
+--------------------------------------------------------------------------------------------------------
+🔹 1. CAST to INTEGER
+
+❓ Q1: Convert amount to number
+
+SELECT amount, CAST(amount AS SIGNED) FROM Sales;
+
+
+✅ Output
+100 → 100  
+200 → 200  
+300 → 300  
+
+
+Signed & Unsigned
+SIGNED = allows both negative and positive values
+UNSIGNED = allows only positive values (and 0)
+
+--------------------------------------------------------------------------------------------------------
+🔹 2. Use CAST for Calculation
+
+❓ Q2: Add 50 to amount
+
+SELECT amount, CAST(amount AS SIGNED) + 50 FROM Sales;
+
+✅ Output
+100 → 150  
+200 → 250  
+300 → 350  
+
+ Without CAST → it behaves like string 
+ With CAST → works as number 
+
+--------------------------------------------------------------------------------------------------------
+🔹 3. CAST to DECIMAL
+
+❓ Q3: Convert to decimal
+
+SELECT amount, CAST(amount AS DECIMAL(10,2)) FROM Sales;
+
+✅ Output
+100 → 100.00  
+200 → 200.00  
+300 → 300.00  
+
+--------------------------------------------------------------------------------------------------------
+🔹 4. CAST Number to CHAR
+
+❓ Q4: Convert number to string
+
+SELECT CAST(500 AS CHAR);
+
+✅ Output
+'500'
+
+--------------------------------------------------------------------------------------------------------
+🔹 5. CAST Date
+
+❓ Q5: Convert string to date
+
+SELECT CAST('2024-01-10' AS DATE);
+
+✅ Output
+2024-01-10
+
+--------------------------------------------------------------------------------------------------------
+
+🔹 6. CAST DateTime
+
+❓ Q6: Convert string to datetime
+
+SELECT CAST('2024-01-10 10:30:00' AS DATETIME);
+
+✅ Output
+2024-01-10 10:30:00
+
+====================================================
+SCENARIO 1: NUMBERS STORED AS TEXT
+====================================================
+
+Create Table:
+
+CREATE TABLE Employees (
+    emp_id INT,
+    emp_name VARCHAR(50),
+    salary VARCHAR(20)
+);
+
+Insert Data:
+
+INSERT INTO Employees VALUES
+(101,'John','50000'),
+(102,'David','60000'),
+(103,'Mary','70000');
+
+View Data:
+
+SELECT * FROM Employees;
+
+Requirement:
+Increase salary by 10%
+
+Query:
+
+SELECT
+    emp_name,
+    CAST(salary AS DECIMAL(10,2)) * 1.10 AS NewSalary
+FROM Employees;
+
+Why CAST?
+salary is stored as VARCHAR but calculation requires numeric datatype.
+
+====================================================
+SCENARIO 2: DATES STORED AS TEXT
+====================================================
+
+Create Table:
+
+CREATE TABLE Orders (
+    order_id INT,
+    order_date VARCHAR(20)
+);
+
+-- Insert Data:
+
+INSERT INTO Orders VALUES
+(1,'2025-06-20'),
+(2,'2025-07-15'),
+(3,'2025-08-10');
+
+Requirement:
+Extract Year
+
+Query:
+
+SELECT
+    order_id,
+    YEAR(CAST(order_date AS DATE)) AS OrderYear
+FROM Orders;
+
+SELECT
+    order_id,
+    CAST(order_date AS DATE) AS OrderYear
+FROM Orders;
+
+Why CAST?
+YEAR() works on DATE datatype.
+
+====================================================
+SCENARIO 3: CONCATENATING NUMBER AND TEXT
+====================================================
+
+Create Table:
+
+CREATE TABLE EmployeeMaster (
+    emp_id INT,
+    emp_name VARCHAR(50)
+);
+
+Insert Data:
+
+INSERT INTO EmployeeMaster VALUES
+(101,'John'),
+(102,'David');
+
+Query:
+
+SELECT
+    CONCAT('Employee ID : ', CAST(emp_id AS CHAR)) AS Details
+FROM EmployeeMaster;
+
+Output:
+
+Employee ID : 101
+Employee ID : 102
+
+Why CAST?
+Converts numeric value into text.
+
+====================================================
+

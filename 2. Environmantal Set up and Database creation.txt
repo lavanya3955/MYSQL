@@ -1,0 +1,197 @@
+
+MY SQL Installation....
+---------------------------------------------------------------------------------------------------
+
+Go to google & search mysql command line client download
+
+Link: https://dev.mysql.com/downloads/installer/
+
+
+Click on - MySQL Downloads - MySQL Community (GPL) Downloads - MySQL Installer for Windows - 
+Windows (x86, 32-bit), MSI Installer 8.0.45 556.0M - Download
+
+no thanks, jus download
+
+---------------------------------------------------------------------------------------------------
+MY SQL COMMAND LINE
+---------------------------------------------------------------------------------------------------
+
+Enter password: **********
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 8
+Server version: 8.0.43 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+Another Instance : win+R - cmd - mysql -u root -p
+path: "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql" -u root -p
+
+unlimited command line sessions
+------------------------------------------------------------------------------------
+This means you have successfully opened MySQL, Every SQL statement must end with:
+; OR \g
+
+You are using MySQL version 8.0.43
+“Community Server” = free version
+“GPL” = open-source license, General Public License....... 
+MySQL Community Server uses GPL, so:
+
+Anyone can download and use it without paying
+
+MySQL is owned by Oracle company. GPL is a license already given by the software owner (like MySQL by Oracle)
+You can directly download and use the software.
+
+
+My sql workbench.. 
+
+y do u need sql workbench if u already have command line.. 
+
+Both do the same work but in command line but u need to write commands for each & everything , no buttons, no visuals 
+only advantage is Fast for experts & uses less memory.
+---------------------------------------------------------------------------------------------------
+MySQL Workbench (GUI) - Works with buttons, menus, and visual screens
+
+Advantages: Easy for beginners,
+Shows tables, data, schemas visually
+No need to remember everything
+Can edit data like Excel
+Query results shown in table format
+
+disadvantage is slightly slower than command line.
+
+type in google - mysql workbench homepage.(official page)
+
+EER = Enhanced Entity Relationship
+---------------------------------------------------------------------------------------------------
+
+Basic commands in Command line client:
+---------------------------------------------------------------------------------------------------
+show databases;
+
+Default databes:
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+
+
+information_schema → stores database structure (tables, columns, metadata)
+mysql → stores users, passwords, and permissions
+performance_schema → stores performance and execution details
+sys → provides easy-to-read performance reports
+
+performance_schema collects raw performance data about MySQL activities
+This shows:
+Queries executed
+How many times they ran
+Average execution time
+Total execution time
+
+
+use information_schema ;
+show tables;
+
+create database databasename;
+
+Database names should be unique and follow naming rules (no spaces, no special characters).
+
+
+use databasename;
+
+create table customers
+(
+cust_id int,
+cust_name varchar(100),
+cust_address varchar(100)
+);
+
+desc students1;
+
+
+CREATE DATABASE IF NOT EXISTS db_name;
+
+DROP DATABASE IF EXISTS db_name;
+CREATE DATABASE db_name;
+
+
+DATA Types: 
+
+Numeric -tiny int/small, int, bigint, decimal, float, double 
+String - char,varchar,blob (binary large object - images, videos, audios, pdf documents),text
+Date and Time -date,datetime,time,timestamp,year.
+
+
+-----Numeric-----
+tinyint - Stores very small numbers - 1 byte (255 numbers) - ex:age,ratings
+int - stores medium numbers - 4 bytes - That is about 2 billion range - ex:salary, IDs
+bigint - stores large numbers - 8 bytes - 9 quintillion - ex large IDs, big calculations
+
+| Bytes   | Data Type | Range (approx)              | Digits          |
+| ------- | --------- | --------------------------- | --------------- |
+| 1 byte  | TINYINT   | 0 to 255                    | 1–3 digits      |
+| 4 bytes | INT       | ~2 billion                  | up to 10 digits |
+| 8 bytes | BIGINT    | very large (~9 quintillion) | up to 19 digits |
+
+Signed & Unsigned
+SIGNED = allows both negative and positive values
+UNSIGNED = allows only positive values (and 0)
+
+
+DECIMAL → exact value (like money) ex:: DECIMAL(10, 2) ------ 10 [overall it takes 10 digits , in that 2 are for digits after decimalpoint]
+= whole number part wil take 8 digits, 2 digits after the decimal..
+
+FLOAT → approximate values(like measurements 📏 - temparature) -- 36.6789123 --- rounded to 36.678913
+DOUBLE → more accurate approximation ---- Measuring Distance in Space
+
+
+-----String-----
+
+Char - Fixed length like gender, ex:char(10) it'l reserve the space for 10 characters
+varchar -  Variable length,  varchar(10) - stores only what is needed
+
+| Feature | CHAR            | VARCHAR         |
+| ------- | --------------- | --------------- |
+| Length  | Fixed           | Variable        |
+| Space   | Wastes space    | Saves space     |
+| Speed   | Slightly faster | Slightly slower |
+
+
+------ DATE ------
+
+DATETIME-can store date & time
+TIMESTAMP-can store date & time but auto updates 
+i.e - You create a record → time stored
+You update the record → time updates again automatically
+
+DEFAULT CURRENT_TIMESTAMP -  2026-04-03 14:25:10
+
+
+-------- Example -----------
+
+
+
+| CustomerID 	   | FirstName           | LastName 	      | Email                     | Address           |
+| ---------------- | ------------------- | ------------------ | --------------------------------------------------------| 
+| 101              | Lavanya             | Reddy              | [lavanya.reddy@gmail.com] | 12, MG Road, Bangalore      |
+| 102              | Arjun               | Sharma             | [arjun.sharma@yahoo.com   | 45, Brigade Road, Bangalore |
+| 103              | Priya               | Nair               | [priya.nair@outlook.com]  | 78, Indiranagar, Bangalore  |
+| 104              | Rahul               | Verma              | [rahul.verma@gmail.com]   | 22, Whitefield, Bangalore   |
+| 105              | Sneha               | Patel              | [sneha.patel@gmail.com]   | 9, Banjara Hills, Hyderabad |
+
+
+CustomerID (INT) → Only numbers (no text, no decimals)
+FirstName / LastName (VARCHAR) → Text values (names)
+Email (VARCHAR) → Alphanumeric text with special characters (@, .)
+Address (VARCHAR) → Long text (mix of numbers + words)
+
+

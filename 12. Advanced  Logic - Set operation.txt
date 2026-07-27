@@ -1,0 +1,133 @@
+--------------------------------------------------------------------------------------
+SETS OPERATORS
+--------------------------------------------------------------------------------------
+
+Set operators are used to combine results of two or more SELECT queries.
+
+condition:
+
+Same number of columns
+Compatible data types
+Columns should be in same order
+
+
+1. UNION -combines results of two SELECT queries and removes duplicates
+2. UNION ALL -combines results of two SELECT queries and keeps duplicates
+3. INTERSECT - Common rows in both tables
+4. EXCEPT -Rows in first table but not in second
+
+--------------------------------------------------------------------------------------
+🔹 Step 1: Create Tables
+
+CREATE TABLE Students_A (
+    id INT,
+    name VARCHAR(50)
+);
+
+CREATE TABLE Students_B (
+    id INT,
+    name VARCHAR(50)
+);
+
+--------------------------------------------------------------------------------------
+🔹 Step 2: Insert Data
+
+INSERT INTO Students_A VALUES
+(1, 'Ravi'),
+(2, 'Anu'),
+(3, 'Kiran'),
+(4, 'Meena');
+
+INSERT INTO Students_B VALUES
+(3, 'Kiran'),
+(4, 'Meena'),
+(5, 'Raj'),
+(6, 'Sita');
+
+🔹 View Tables
+SELECT * FROM Students_A;
+SELECT * FROM Students_B;
+
+--------------------------------------------------------------------------------------
+UNION (No duplicates)
+--------------------------------------------------------------------------------------
+❓ Q1: Combine both tables without duplicates
+
+SELECT * FROM Students_A
+UNION
+SELECT * FROM Students_B;
+
+✅ Output
+1 Ravi
+2 Anu
+3 Kiran
+4 Meena
+5 Raj
+6 Sita
+--------------------------------------------------------------------------------------
+UNION ALL (With duplicates)
+--------------------------------------------------------------------------------------
+❓ Q2: Combine both tables with duplicates
+
+SELECT * FROM Students_A
+UNION ALL
+SELECT * FROM Students_B;
+
+✅ Output
+1 Ravi
+2 Anu
+3 Kiran
+4 Meena
+3 Kiran
+4 Meena
+5 Raj
+6 Sita
+
+--------------------------------------------------------------------------------------
+🔹 INTERSECT (Common rows)
+--------------------------------------------------------------------------------------
+
+❓ Q3: Show students present in BOTH tables (common records)
+
+SELECT * FROM Students_A
+INTERSECT
+SELECT * FROM Students_B;
+
+SELECT *
+FROM Students_A
+WHERE (id, name) IN (
+    SELECT id, name
+    FROM Students_B
+);
+
+✅ Expected Output
+3 Kiran
+4 Meena
+
+--------------------------------------------------------------------------------------
+🔹 EXCEPT (Difference)
+--------------------------------------------------------------------------------------
+
+❓ Q4: Show students present in Students_A but NOT in Students_B
+
+SELECT * FROM Students_A
+EXCEPT
+SELECT * FROM Students_B;
+
+SELECT * FROM Students_B
+EXCEPT
+SELECT * FROM Students_A;
+
+SELECT *
+FROM Students_A
+WHERE (id, name) NOT IN (
+    SELECT id, name
+    FROM Students_B
+);
+
+
+✅ Expected Output
+1 Ravi
+2 Anu
+
+
